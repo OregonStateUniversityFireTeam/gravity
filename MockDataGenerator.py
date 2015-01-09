@@ -2,7 +2,7 @@ import argparse, random, math
 
 def main():
 	
-	#just getting arguments... see Optimization code for a description
+	#just getting arguments... see MockDataOptimzie.py code for a description
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-y", "--years", type=int, default=10, help="number of years to run for each landscape")
 	parser.add_argument("-l", "--lineages", "--landscapes", default=5, type=int, help="number of landscapes (aka lineages) to simulate")
