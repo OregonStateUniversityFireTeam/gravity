@@ -1,5 +1,8 @@
 import argparse
 
+#This file just reads a dataset which has been saved to file, back into a dataset object.  "Object" is used loosely here
+#   since it's really just a series of nested lists.
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-f", "--filename", type=str, default="dataset1.txt", help="the name of the file to read")
