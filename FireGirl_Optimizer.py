@@ -22,11 +22,107 @@ class OptimizerDataSet:
         #Boundaries for what the parameters can be set to during scipy's optimization routine:
         self.b_bounds = []
 
+        #Flag: Use log(probabilities)  -  If we want to force sums of log(probs), set to True
+        #                                 To just multiply probabilities, set to False
+        self.USE_LOG_PROB = False
+
             
     def calcLandscapeWeights(self):
+        #Currently, this is a mandatory override in child classes.
         pass
+
     def calcObjectiveFn(self, b=None):
-        pass
+        #This function contains the optimization objective function. It operates
+        #  on the current list of landscapes. If any values for 'b' are passed in,
+        #  (most likely by scipy.optimize.fmin_l_bfgs_b(), then they are assigned
+        #  to the current FireGirl_Policy object so that subsequent function calls
+        #  will use the correct ones.
+                
+        #The objective function is the sum of each landscape's net value, weighted
+        #  by the overall probability of its suppression choices. This probabilty
+        #  is simply the suppression decision values from the logistic function
+        #  all multiplied together.
+
+
+        #variable to hold the final value
+        obj_fn_val = 0    
+        
+        # checking for new beta parameters
+        if not b == None:
+            self.Policy.b = b
+      
+
+        # Calculate the weights... these will use the current Policy
+        #    rather than whatever policy the landscapes used during simulation
+        #    Typically, this will be the multiplied total of the inidividual probabilities
+        #    associated with following or not-following the policy
+        self.calcLandscapeWeights()
+        
+        #a variable to hold the sum of ALL the probability-weighted landscape values
+        total_value = 0
+        
+        #loop over all the values/weights and sum them
+        for ls in range(len(self.landscape_set)):
+            total_value += self.landscape_net_values[ls] * self.landscape_weights[ls]
+        
+        #NOTE:
+        #any final checks/modifications to total_val can go here:
+
+        #since scipy fmin... is a minimization routine, return the negative
+        obj_fn_val = -1 * total_value    
+        
+        
+        return obj_fn_val
+
+
+    def calcObjDerivative(self, b=None):
+        #This function returns the gradient of the objective function
+
+        #The scipy documentation describes the fprime arguement as:
+        #fprime : callable fprime(x,*args)
+        #The gradient of func. If None, then func returns the function value and the 
+        #  gradient (f, g = func(x, *args)), unless approx_grad is True in which case func returns only f.
+
+        #The return value should probably just be a list of the derivitive values with respect to each 
+        #   b-parameter in the policy
+
+        #  d Obj()/d b_k value is 
+        #
+        #   Sum over landscapes [ val_l * product over ignitions [ prob_i ] * sum over ignitions [d wrt prob / prob] ]
+        #
+        #   where d wrt prob =  sup_i * d(logistic(b*f)) + (1 - sup_i)(-1) (d(logistic(b*f)))
+        #
+        #   and where d(logistic(b*f)) = f_l,i,k * logistic(f_l,i,k * b_k) * (1 - logistic(f_l,i,k * b_k))
+
+
+        # list to hold the final values, one per parameter
+        d_obj_d_bk = []
+        for i in range(len(b)):
+            d_obj_d_bk.append(0)
+
+
+        #iterate over each beta and evaluate the gradient along it
+        for beta in range(len(b)):
+
+            #get the total probability for each landscape decision sequence
+            self.calcLandscapeWeights()
+
+            #variable to hold the sum of the delta(prob)/prop values
+            sum_delta_prob_ = 0
+
+            for l in range(len(self.landscape_set)):
+
+                for i in range(len(self.landscape_set[l].Logbook.log_list)):
+
+                    logistic = FireGirl_Policy.logistic
+
+                    prob = (sup_i)*logistic()
+
+                    sum_delta_prob_ += delta_prob / prob
+
+                d_obj_d_bk[l] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob_
+
+
         
     def optimizePolicy(self, iterations=1, acceptance_threshold=None):
         #This function will work through the given number of gradient descent 
@@ -141,7 +237,8 @@ class FireGirl_Optimizer(OptimizerDataSet):
             #Have each landscape simulate for the given number of years
             ls.doYears(years_per_landscape)
             
-        
+        #Finish up by calculating the final values of each landscape
+        sumLandscapeValues()
         
     
     def sumLandscapeValues(self):
@@ -208,7 +305,7 @@ class FireGirl_Optimizer(OptimizerDataSet):
         self.landscape_weights = []
         
         #a loop variable
-        entry_sum = 0
+        entry_sum = 1
         
         #loop over each landscape
         for ls in range(len(self.landscape_set)):
@@ -217,7 +314,10 @@ class FireGirl_Optimizer(OptimizerDataSet):
             self.landscape_weights.append(0)
             
             #reset the sum
-            entry_sum = 0
+            if self.USE_LOG_PROB == False:
+                entry_sum = 1  #for multiplication, start at 1
+            else:
+                entry_sum = 0  #for sums of log(probabilities), start at 0
             
             #loop over this landscape's logbook entries
             for entry in self.landscape_set[ls].Logbook.log_list:
@@ -269,10 +369,22 @@ class FireGirl_Optimizer(OptimizerDataSet):
                 # picking the appropriate version of the probabilty:
                 if entry.suppress_decision == True:
                     #this fire was suppressed, so use the probability as it stands
-                    entry_sum += math.log(new_prob)
+
+                    if self.USE_LOG_PROB == True:
+                        #we're using log(prob) calculations, so add the log(new_prob) to the sum
+                        entry_sum += math.log(new_prob)
+                    else:
+                        #we're using straight probability multiplication, so just multiply
+                        entry_sum *= new_prob
                 else:
                     #this fire was not suppressed, so use 1-p
-                    entry_sum += math.log( 1 - new_prob )
+
+                    if self.USE_LOG_PROB == True:
+                        #we're using log(prob) calculations, so add the log(new_prob) to the sum
+                        entry_sum += math.log(1 - new_prob)
+                    else:
+                        #we're using straight probability multiplication, so just multiply
+                        entry_sum *= (1 - new_prob)
                     
             
             #done looping over this landscape's logbook entries
@@ -286,8 +398,8 @@ class FireGirl_Optimizer(OptimizerDataSet):
         
         #Done looping: All landscape weights have been recorded
 
-    def calcObjectiveFn(self, b=None):
-        #Mandatory override of the parent function:
+    def calcObjectiveFn_NOW_IGNORING(self, b=None):
+        # Override of the parent function:
         
         #This function contains the optimization objective function. It operates
         #  on the current list of landscapes. If any values for 'b' are passed in,
