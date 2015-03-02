@@ -28,14 +28,28 @@ class OptimizerDataSet:
 
             
     def calcLandscapeWeights(self):
+        #This function looks through each fire of a given landscape and applies the current
+        #  policy to the features of each one. The resulting 'probability' from the policy 
+        #  function is either multiplied or 'log-summed' be the others to produce the final 
+        #  weighting value. This is done for every landscape in the landscape_set, and each
+        #  weight is assigned to landscape_weights[] at the same index as their landscape in 
+        #  the landscape_set list
+
+
         #Currently, this is a mandatory override in child classes.
+
+        #It Should work like this:
+        
+        #for l in range(len(self.landscape_set)):
+        #   for i in range(self.landscape_set[l].getIgnitionCount()):
+        #       
         pass
 
     def calcObjectiveFn(self, b=None):
         #This function contains the optimization objective function. It operates
         #  on the current list of landscapes. If any values for 'b' are passed in,
         #  (most likely by scipy.optimize.fmin_l_bfgs_b(), then they are assigned
-        #  to the current FireGirl_Policy object so that subsequent function calls
+        #  to the current HKBFire_Policy object so that subsequent function calls
         #  will use the correct ones.
                 
         #The objective function is the sum of each landscape's net value, weighted

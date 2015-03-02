@@ -3,7 +3,31 @@ from FireGirl_DS_alg import *
 from FireGirl_Policy import *
 from FireGirl_Landscape_Logbook import *
 
-class FireGirl_Landscape:
+class HKBFire_Landscape:
+    #This class is a generic landscape holder for either a FireGirl or a FireWoman
+    #  landscape. At the minimum, it must have a Logbook object of one kind or another
+    #  to hold logbook items which define each fire event in the sequence.
+    
+    def __init__(self, ID_number, Policy_Object):
+        pass
+
+    def evaluateSuppressionRule(self, ignition_number):
+        pass
+
+    def chooseSuppression(self, suppress_prob):
+        #This function just rolls the dice against the given probability and
+        # returns true for suppress, and false for let-burn
+        
+        if random.uniform(0,1) < suppress_prob:
+            return True
+        else:
+            return False
+
+    def getIgnitionCount(self):
+        pass
+
+
+class FireGirl_Landscape(HKBFire_Landscape):
     #This class holds a single FireGirl landscape, and has all the necessary 
     #  functions to allow it to evolve, change, etc..., as well as to read/write
     #  the data to file.
@@ -26,7 +50,9 @@ class FireGirl_Landscape:
         #The ID of the landscape is used to uniquely identify it for file in/out 
         # functions, and to seed it's random number generation procedures, for 
         # replicability
-        self.ID_number = -1
+
+        #assigning the ID number (required!)
+        self.ID_number = ID_number
         
         #The policy object is defined in FireGirl_Policy.py, and contains everything
         #  required to evaluate a set of features against a given policy. To the
@@ -143,8 +169,8 @@ class FireGirl_Landscape:
         self.crownfire_param_outputscale = 1
         self.crownfire_param_zeroadjust = 5
         self.crownfire_param_smoothness = 1
-        #assigning the ID number (required!)
-        self.ID_number = ID_number
+
+
     
     
     
@@ -357,15 +383,6 @@ class FireGirl_Landscape:
         
         return pol_val
         
-    def chooseSuppression(self, suppress_prob):
-        #This function just rolls the dice against the given probability and
-        # returns true for suppress, and false for let-burn
-        
-        if random.uniform(0,1) < suppress_prob:
-            return True
-        else:
-            return False
-    
     def calcFireSpreadRate(self, wind, temp, fuel):
         #This function calculates the logistic function that governs fire spread
         #   rates. The parameters below are arbitrary, and give rise to the
