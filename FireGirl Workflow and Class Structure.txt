@@ -1,0 +1,32 @@
+#FIREGIRL WORKFLOW
+
+
+#USING NEW FIREGIRL LANDSCAPES
+FGPolOpt = FireGirlPolicyOptimzer()
+FGPolOpt.createFireGirlLandscapes(100, 100, None)
+#since no policy is passed in, the creation routine above will make a generic 50/50 policy
+FGPolOpt.optimizePolicy()
+
+#USING PRE-CREATED FIREGIRL LANDSCAPES and a NEW POLICY
+FGPolOpt = FireGirlPolicyOptimizer()
+FGPolOpt.loadFireGirlLandscapes('filename')
+FGPolOpt.setNewPolicy()
+FGPolOpt.optimizePolicy()
+
+#USING PRE-CREATED FIREGIRL LANDSCAPES and an EXISTING POLICY
+FGPolOpt = FireGirlPolicyOptimizer()
+FGPolOpt.loadFireGirlLandscapes('filename')
+FGPolOpt.loadPolicy('policy_filename')
+FGPolOpt.optimizePolicy()
+
+#USING FIREWOMAN LANDSCAPES
+FGPolOpt = FireGirlPolicyOptimizer()
+FGPolOpt.loadFireWomanLandscapes('filename')
+FGPolOpt.loadPolicy('policy_filename')
+FGPolOpt.optimizePolicy()
+
+
+
+
+
+#FIREGIRL CLASS STRUCTURE

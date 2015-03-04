@@ -38,11 +38,17 @@ class OptimizerDataSet:
 
         #Currently, this is a mandatory override in child classes.
 
+
         #It Should work like this:
-        
-        #for l in range(len(self.landscape_set)):
-        #   for i in range(self.landscape_set[l].getIgnitionCount()):
-        #       
+
+        #for ls in self.landscape_set:
+        #
+        #    #setting this landscape's policy to the current one
+        #    ls.Policy = self.Policy
+        #
+        #    for i in range(ls.getIgnitionCount()):
+        #        
+        #        ls.evaluatePolicy
         pass
 
     def calcObjectiveFn(self, b=None):
