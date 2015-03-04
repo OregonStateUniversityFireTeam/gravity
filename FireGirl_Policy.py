@@ -1,6 +1,6 @@
 import math
 
-class HKBFire_Policy:
+class FireGirlPolicy:
     #This is a the base class for both the FireGirl_Policy and FireWoman_Policy classes
     #Note: It is intended that this class will not be used on it's own, but rather only
     #  in it's inherited forms.
@@ -13,7 +13,10 @@ class HKBFire_Policy:
         self.b = []
         
         #Child classes add (or override) their own members as well
-        
+    
+    def setParams(parameter_list):
+        self.b = parameter_list
+
     def crossProduct(self):
         #This function will return the crossproduct between each feature and it's 
         #  corresponding parameter beta value 
@@ -27,13 +30,20 @@ class HKBFire_Policy:
     def logistic(self, value):
         #This function calculates the simple logistic function value of the input
         return (  1 / (1 + math.exp(-value))  )   
-        
+    
+    def calcProb(feature_list):
+        self.features = feature_list
+        cp = self.crossProduct()
+        prob = self.logistic(cp)
+        return prob
+
+    ## DEPRECATING ##
     def evaluateSuppressionProbability(self):
         cp = self.crossProduct()
         return self.logistic(cp)     
         
    
-class FireGirl_Policy(HKBFire_Policy):
+class FireGirlPolicy_DEPRECATING(FireGirlPolicy):
     #This class contains all the code that actually interacts with the policy
     #  function, it's parameters, etc...
     #It inherits from a generic fire policy class, HKBFire_Policy

@@ -3,31 +3,7 @@ from FireGirl_DS_alg import *
 from FireGirl_Policy import *
 from FireGirl_Landscape_Logbook import *
 
-class HKBFire_Landscape:
-    #This class is a generic landscape holder for either a FireGirl or a FireWoman
-    #  landscape. At the minimum, it must have a Logbook object of one kind or another
-    #  to hold logbook items which define each fire event in the sequence.
-    
-    def __init__(self, ID_number, Policy_Object):
-        pass
-
-    def evaluateSuppressionRule(self, ignition_number):
-        pass
-
-    def chooseSuppression(self, suppress_prob):
-        #This function just rolls the dice against the given probability and
-        # returns true for suppress, and false for let-burn
-        
-        if random.uniform(0,1) < suppress_prob:
-            return True
-        else:
-            return False
-
-    def getIgnitionCount(self):
-        pass
-
-
-class FireGirl_Landscape(HKBFire_Landscape):
+class FireGirlLandscape:
     #This class holds a single FireGirl landscape, and has all the necessary 
     #  functions to allow it to evolve, change, etc..., as well as to read/write
     #  the data to file.
@@ -58,21 +34,12 @@ class FireGirl_Landscape(HKBFire_Landscape):
         #  required to evaluate a set of features against a given policy. To the
         #  landscape object, this operates as a black box.
         self.Policy = Policy_Object
-        
-        #The Logbook object allows this landscape to record its yearly history
-        self.Logbook = FireGirl_Landscape_Logbook()
-        
-        
-        #Starting a list to hold FireGirl_FireLog objects. Each one holds a full 
-        #  record of one fire, including the cells that burn, when they burn, and 
-        #  other information like crownfires.
-        self.FireLog = []
-        
+
         
         #In order to use truly pseudo-random numbers throughout, this flag can be 
         #  set to True. This will eliminate the option of replicability, so it
         #  defaults to False
-        self.truePseudoRandom = False
+        self.TRUE_PSEUDO_RANDOM = False
         
         #The width and height are being set to 129 to correspond with the diamond-
         #  -square algorithm outputs. The centered "window of interest" will be
@@ -87,12 +54,26 @@ class FireGirl_Landscape(HKBFire_Landscape):
         #  numbers already drawn.
         self.year = 0
         
+
+        
+        ###########################
+        # FIRGIRL MODEL VARIABLES #
+        ###########################
+
         #Each cell has it's own stand values. So far, just timber_value, representing
         #  and integrated measure of age/density of harvestable trees, and fuel_load
         #  which is a more abstract interpretation of the dog-hair thickets, downed
         #  snags, etc... that build up when there isn't fire. It will be a primary
         #  determinant of whether a fire burns into the crowns, determining the 
         #  timber_value that is lost, or not, by the blaze.
+                
+        #The Logbook object allows this landscape to record its yearly history
+        self.Logbook = FireGirl_Landscape_Logbook()
+
+        #Starting a list to hold FireGirl_FireLog objects. Each one holds a full 
+        #  record of one fire, including the cells that burn, when they burn, and 
+        #  other information like crownfires.
+        self.FireLog = []
         
         #Creating a rectangular array to hold timber values for each cell
         self.timber_value = []
@@ -108,14 +89,9 @@ class FireGirl_Landscape(HKBFire_Landscape):
             for j in range(self.height):
                 self.fuel_load[i].append(0)
         
-        
-        ###################
-        # MODEL VARIABLES #
-        ###################
-        
         # ignition probability: the likelihood of there being an important fire on
         #   any given year
-        self.ignition_prob = 0.8
+        self.ignition_prob = 0.9
         
         # temperature variables: These variables control the temperature average and
         #    mean, throughout the year. They are based on a cosine distribution (for
@@ -171,12 +147,39 @@ class FireGirl_Landscape(HKBFire_Landscape):
         self.crownfire_param_smoothness = 1
 
 
+
+    #####################
+    # GENERAL FUNCTIONS #
+    #####################
+
+    def chooseSuppression(self, suppress_prob):
+        #This function just rolls the dice against the given probability and
+        # returns true for suppress, and false for let-burn
+        
+        #TODO enforce TRUE_PSEUDO_RANDOM flag
+        if random.uniform(0,1) < suppress_prob:
+            return True
+        else:
+            return False
+    
+    def getIgnitionCount():
+        pass
+    def assignPolicy(policy):
+        self.Policy = policy
+
+    def resetPolicy():
+        self.Policy = FireGirlPolicy()
+        
+    def calcTotalProb():
+        pass
+    def getNetValue():
+        pass
     
     
-    
-    ####################
-    # Member Functions #
-    ####################
+    ###############################
+    # FireGirl-Specific Functions #
+    ###############################
+
     
     def drawIgnitionDay(self):
         #This function draws a random day to simulate an ignition. 

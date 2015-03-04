@@ -30,3 +30,49 @@ FGPolOpt.optimizePolicy()
 
 
 #FIREGIRL CLASS STRUCTURE
+
+class FireGirlPolicyOptimizer
+    #Functions intended to be Public
+    function createFireGirlLandscapes(landscape_count, years, Policy_object=None)
+    function loadFireGirlLandscapes(filename)
+    function loadFireWomanLandscapes(filename)
+    function setNewPolicy()
+    function loadPolicy(filename)
+    function optimizePolicy()
+
+    #Functions intended to be Private
+    function calcLandscapeWeights()
+    function calcObjFn(b=None)
+    function calcObjFPrime(b=None)
+
+
+class FireGirlLandscape
+    #functions which are relevant to both FireGirl and FireWoman landscapes
+    function getIgnitionCount()
+    function assignPolicy(Policy)
+    function resetPolicy()
+    function calcTotalProb()
+    function getNetValue()
+
+    #functions specific to FireGirl-style landscapes
+    function makeNewFireGirlLS()
+    function doFire()
+    function doLogging()
+    function doGrowth()
+    function doOneYear()
+    function doYears()
+    function getIgnLoc()
+    function getWeather(date)
+
+
+class FireGirlPolicy
+    function setParams(parameter_list)
+    function calcProb(feature_list)
+    function logistic(x)
+
+
+class FireGirlIgnitionRecord
+    list    self.features[]
+    numeric self.policy_prob
+    boolean self.policy_choice
+    list    self.outcomes[]
