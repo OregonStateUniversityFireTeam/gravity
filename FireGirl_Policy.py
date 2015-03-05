@@ -4,22 +4,49 @@ class FireGirlPolicy:
     #This is a the base class for both the FireGirl_Policy and FireWoman_Policy classes
     #Note: It is intended that this class will not be used on it's own, but rather only
     #  in it's inherited forms.
+
+    #If a list of parameters is passed in, the local b values will be set accordingly,
+    #  and SETALL and COUNT will be ignored.
+
+    #If SETALL is set and params==None, then all parameters will be set to the given value
+
+    #COUNT is the total number of parameters to set, so assuming SETALL is used (no param list)
+    #  then the SETALL value will be assigned this many times
     
-    def __init__(self):
+    def __init__(self, params=None, SETALL=None, COUNT=None):
         # a list of features, designed to be set repeatedly for each fire event
         self.features = []
         
         # a list of this policy's parameters.
         self.b = []
         
-        #Child classes add (or override) their own members as well
-    
+        #Checking for initialization values, and assigning them as appropriate
+        if not params == None:
+            self.b = params
+        else:
+            if not COUNT == None:
+                if not SETALL == None:
+                    for i in range(COUNT):
+                        self.b.append(SETALL)
+
+
     def setParams(parameter_list):
         self.b = parameter_list
 
-    def crossProduct(self):
+    def setFeatures(feature_list):
+        self.features = feature_list
+
+    def getParams():
+        return self.b
+
+    def crossProduct(self, feature_list=None):
         #This function will return the crossproduct between each feature and it's 
         #  corresponding parameter beta value 
+
+        #if no feature list is passed, just use what the Policy already has
+        #otherwise, use what's been given.
+        if not feature_list == None:
+            self.features = feature_list
         
         cp = 0
         for i in range(len(self.features)):
@@ -31,7 +58,7 @@ class FireGirlPolicy:
         #This function calculates the simple logistic function value of the input
         return (  1 / (1 + math.exp(-value))  )   
     
-    def calcProb(feature_list):
+    def calcProb(self, feature_list):
         self.features = feature_list
         cp = self.crossProduct()
         prob = self.logistic(cp)

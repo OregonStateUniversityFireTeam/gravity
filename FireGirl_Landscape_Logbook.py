@@ -1,3 +1,65 @@
+class FireGirlIgnitionRecord:
+    #This class holds the salient information from any igition, either in FireGirl or
+    #  in FireWoman landscapes.
+
+    #self.features is a list of feature values known at the beginning of each ignition
+    #   event. This should only contain information that a fire manager would know at 
+    #   the time of ignition, and on which they could base their suppression decisions.
+
+    #self.policy_prob holds the probability of suppresion given by a FireGirlPolicy object.
+
+    #self.policy_choice is a boolean flag which records True if the fire was suppressed and
+    #   False if the fire was not suppressed.
+
+    #self.outcomes is a list of any information about the results of the fire, mostly intended
+    #   for post hoc analysis of the program.
+
+    #self.feature_labels is an optional list of strings describing what each value in 
+    #   self.features means.
+
+    #self.outcome_labels is an optional list of strings describing what each value in 
+    #   self.outcomes means.
+
+    def __init__(self):
+        self.features = []
+        self.policy_prob = 1
+        self.policy_choice = False
+        self.outcomes = []
+        self.feature_labels = []
+        self.outcome_labels = []
+
+    def getProb(self):
+        return self.policy_prob
+
+    def getChoice(self):
+        return self.policy_choice
+
+    def getFeatures():
+        return self.features
+
+    def getOutcomes():
+        return self.outcomes
+
+    def getFeatureLabels():
+        return self.feature_labels
+
+    def getOutcomeLabels():
+        return self.outcome_labels
+
+    def setFeatures(feature_list):
+        self.features = feature_list
+
+    def setOutcomes(outcome_list):
+        self.outcomes = outcome_list
+
+    def setFeatureLabels(labels):
+        self.feature_labels = labels
+
+    def setOutcomeLabels(labels):
+        self.outcome_labels = labels
+
+
+
 class FireGirl_Landscape_Logbook:
     # This class defines an entire logbook
     

@@ -9,7 +9,8 @@ class FireGirlLandscape:
     #  the data to file.
     
     ###FEATURE VALUES ###
-    # For the suppression rule, the following are the features being used:
+    # For the suppression rule in FireGirl landscapes, the following are the 
+    #     features being used:
     #
     #  Wind Speed - one value per day/fire
     #  Temperature - one value per day/fire
@@ -22,7 +23,7 @@ class FireGirlLandscape:
     #  Average Fuel Load adjacent 8
     #  Average Fuel Load adjacent 24
     
-    def __init__(self, ID_number, Policy_Object):
+    def __init__(self, ID_number, policy_object=None, FIREGIRL_DATA=True):
         #The ID of the landscape is used to uniquely identify it for file in/out 
         # functions, and to seed it's random number generation procedures, for 
         # replicability
@@ -33,19 +34,29 @@ class FireGirlLandscape:
         #The policy object is defined in FireGirl_Policy.py, and contains everything
         #  required to evaluate a set of features against a given policy. To the
         #  landscape object, this operates as a black box.
-        self.Policy = Policy_Object
 
-        
+        self.Policy = None
+        if policy_object == None:
+            self.Policy = FireGirlPolicy()
+        else:
+            self.Policy = policy_object
+
+        # A list of each ignition event, recorded as FireGirlIgnitonRecord objects
+        self.ignitions = []
+
+        # A value to hold the net value of the landscape after all fires, suppresions, 
+        #    etc...
+        self.net_value = 0
+
         #In order to use truly pseudo-random numbers throughout, this flag can be 
         #  set to True. This will eliminate the option of replicability, so it
         #  defaults to False
         self.TRUE_PSEUDO_RANDOM = False
-        
-        #The width and height are being set to 129 to correspond with the diamond-
-        #  -square algorithm outputs. The centered "window of interest" will be
-        #  the central 43x43 square
-        self.width = 129
-        self.height = 129
+
+        #Flag: Use log(probabilities)  -  If we want to force sums of log(probs), set to True
+        #                                 To just multiply probabilities, set to False
+        self.USE_LOG_PROB = False
+
         
         #The current landscape year starts at 0 and then increments as needed.
         #  It is used, along with the landscape's ID number, to seed the random
@@ -54,97 +65,109 @@ class FireGirlLandscape:
         #  numbers already drawn.
         self.year = 0
         
+        #A flag that indicates whether or not this landscape contains FireGirl Data
+        #   Set True if so, and False if its using FireWoman data
+        self.FIREGIRL_DATA = FIREGIRL_DATA
 
         
         ###########################
         # FIRGIRL MODEL VARIABLES #
         ###########################
 
-        #Each cell has it's own stand values. So far, just timber_value, representing
-        #  and integrated measure of age/density of harvestable trees, and fuel_load
-        #  which is a more abstract interpretation of the dog-hair thickets, downed
-        #  snags, etc... that build up when there isn't fire. It will be a primary
-        #  determinant of whether a fire burns into the crowns, determining the 
-        #  timber_value that is lost, or not, by the blaze.
-                
-        #The Logbook object allows this landscape to record its yearly history
-        self.Logbook = FireGirl_Landscape_Logbook()
+        if self.FIREGIRL_DATA == True:
 
-        #Starting a list to hold FireGirl_FireLog objects. Each one holds a full 
-        #  record of one fire, including the cells that burn, when they burn, and 
-        #  other information like crownfires.
-        self.FireLog = []
-        
-        #Creating a rectangular array to hold timber values for each cell
-        self.timber_value = []
-        for i in range(self.width):
-            self.timber_value.append([])
-            for j in range(self.height):
-                self.timber_value[i].append(0)
-        
-        #(Creating a rectangular array to hold fuel-load values for each cell
-        self.fuel_load = []
-        for i in range(self.width):
-            self.fuel_load.append([])
-            for j in range(self.height):
-                self.fuel_load[i].append(0)
-        
-        # ignition probability: the likelihood of there being an important fire on
-        #   any given year
-        self.ignition_prob = 0.9
-        
-        # temperature variables: These variables control the temperature average and
-        #    mean, throughout the year. They are based on a cosine distribution (for
-        #    smoothness).  Positive temperatures encourage firespread, while negative
-        #    temperatures discourage firespread
-        self.temp_summer_high = 90
-        self.temp_winter_low = -90
-        #for the moment, I'm assuming Jan 1 (day 0) is the coldest, on average)
-        #  and whatever the middle date is (day 183) is the hotest, on average)
-        #
-        #also, for the moment, i'm leaving variance constant
-        self.temp_var = 10
-        
-        # wind variables: These variables control the windspeed average and mean
-        #   throughout the year.
-        #For the moment, I'm just having it draw from an exponential distribution
-        #Windspeeds have a mean of 10 units, but can get much higher, on occasion,
-        # because of the exponential
-        self.wind_mean = 10
-        
-        ### FIRE MODEL ###
-        #These are the parameters that give shape to the fire spreadrate calculation
-        # It is a logistic function that takes FireGirl's (windspeed + temperature)
-        # as it's input.
-        self.fire_param_inputscale = 10
-        self.fire_param_outputscale = 10
-        self.fire_param_zeroadjust = 15
-        self.fire_param_smoothness = 0.4
-        
-        #when doing the priority queue fire model, we have to decide how many cells
-        #  around the current cell to calculate fire arrivals to. This can be any 
-        #  integer between 1 and 43.
-        self.fire_param_reach = 3
-        
-        #Minimum Spread Restrictions
-        # if (wind + temp) fall below a certain threshold, there will not be any
-        #   fire spread.  If there's not enough fuel to sustain a fire, there will 
-        #   not be any fire spread
-        self.min_spread_windtemp = 0 # this enforces a rule that w+t is positive.
-        self.ming_spread_fuel = 10 #fuel ranges from 0 to 100, so this is the very
-                                   #  lowest range.
-        
-        
-        #These are the parameters governing the logistic function that determines
-        #  what percentage of the timber_value is susceptible to burning. In this 
-        #  model, that percentage corresponds to the total timber value that can be
-        #  lost during a fire.
-        #For now, just multiplying between one fifth and one tenth of the spread rate
-        #  by this percentage could yield a decent loss value.
-        self.crownfire_param_inputscale = 10
-        self.crownfire_param_outputscale = 1
-        self.crownfire_param_zeroadjust = 5
-        self.crownfire_param_smoothness = 1
+            #Each cell has it's own stand values. So far, just timber_value, representing
+            #  and integrated measure of age/density of harvestable trees, and fuel_load
+            #  which is a more abstract interpretation of the dog-hair thickets, downed
+            #  snags, etc... that build up when there isn't fire. It will be a primary
+            #  determinant of whether a fire burns into the crowns, determining the 
+            #  timber_value that is lost, or not, by the blaze.
+                    
+            #The Logbook object allows this landscape to record its yearly history
+            self.Logbook = FireGirl_Landscape_Logbook()
+
+            #Starting a list to hold FireGirl_FireLog objects. Each one holds a full 
+            #  record of one fire, including the cells that burn, when they burn, and 
+            #  other information like crownfires.
+            self.FireLog = []
+
+
+            #The width and height are being set to 129 to correspond with the diamond-
+            #  -square algorithm outputs. The centered "window of interest" will be
+            #  the central 43x43 square
+            self.width = 129
+            self.height = 129
+            
+            #Creating a rectangular array to hold timber values for each cell
+            self.timber_value = []
+            for i in range(self.width):
+                self.timber_value.append([])
+                for j in range(self.height):
+                    self.timber_value[i].append(0)
+            
+            #(Creating a rectangular array to hold fuel-load values for each cell
+            self.fuel_load = []
+            for i in range(self.width):
+                self.fuel_load.append([])
+                for j in range(self.height):
+                    self.fuel_load[i].append(0)
+            
+            # ignition probability: the likelihood of there being an important fire on
+            #   any given year
+            self.ignition_prob = 0.9
+            
+            # temperature variables: These variables control the temperature average and
+            #    mean, throughout the year. They are based on a cosine distribution (for
+            #    smoothness).  Positive temperatures encourage firespread, while negative
+            #    temperatures discourage firespread
+            self.temp_summer_high = 90
+            self.temp_winter_low = -90
+            #for the moment, I'm assuming Jan 1 (day 0) is the coldest, on average)
+            #  and whatever the middle date is (day 183) is the hotest, on average)
+            #
+            #also, for the moment, i'm leaving variance constant
+            self.temp_var = 10
+            
+            # wind variables: These variables control the windspeed average and mean
+            #   throughout the year.
+            #For the moment, I'm just having it draw from an exponential distribution
+            #Windspeeds have a mean of 10 units, but can get much higher, on occasion,
+            # because of the exponential
+            self.wind_mean = 10
+            
+            ### FIRE MODEL ###
+            #These are the parameters that give shape to the fire spreadrate calculation
+            # It is a logistic function that takes FireGirl's (windspeed + temperature)
+            # as it's input.
+            self.fire_param_inputscale = 10
+            self.fire_param_outputscale = 10
+            self.fire_param_zeroadjust = 15
+            self.fire_param_smoothness = 0.4
+            
+            #when doing the priority queue fire model, we have to decide how many cells
+            #  around the current cell to calculate fire arrivals to. This can be any 
+            #  integer between 1 and 43.
+            self.fire_param_reach = 1
+            
+            #Minimum Spread Restrictions
+            # if (wind + temp) fall below a certain threshold, there will not be any
+            #   fire spread.  If there's not enough fuel to sustain a fire, there will 
+            #   not be any fire spread
+            self.min_spread_windtemp = 0 # this enforces a rule that w+t is positive.
+            self.ming_spread_fuel = 10 #fuel ranges from 0 to 100, so this is the very
+                                       #  lowest range.
+            
+            
+            #These are the parameters governing the logistic function that determines
+            #  what percentage of the timber_value is susceptible to burning. In this 
+            #  model, that percentage corresponds to the total timber value that can be
+            #  lost during a fire.
+            #For now, just multiplying between one fifth and one tenth of the spread rate
+            #  by this percentage could yield a decent loss value.
+            self.crownfire_param_inputscale = 10
+            self.crownfire_param_outputscale = 1
+            self.crownfire_param_zeroadjust = 5
+            self.crownfire_param_smoothness = 1
 
 
 
@@ -163,7 +186,29 @@ class FireGirlLandscape:
             return False
     
     def getIgnitionCount():
-        pass
+        return len(self.ignitions)
+
+    def getProb(ignition_index):
+        #This function returns it's current Policy's probability calculation for
+        #  the ignition at the given index
+        f = self.ignitions[ignition_index].getFeatures()
+        return self.Policy.calcProb(f)
+
+    def getChoice(ignition_index):
+        #the choice for any given ignition never changes.
+        return self.ignitions[ignition_index].getChoice()
+
+    def getCrossProduct(ignition_index):
+        #This function returns it's current Policy's crossproduct calculation for
+        #  the ignition at the given index
+        f = self.ignitions[ignition_index].getFeatures()
+        return self.Policy.crossProduct(f)
+
+    def getFeature(i,k):
+        #this function returns the kth feature of the ith ignition
+        return self.ignitions[ignition_index].getFeatures().[k]
+
+
     def assignPolicy(policy):
         self.Policy = policy
 
@@ -171,13 +216,77 @@ class FireGirlLandscape:
         self.Policy = FireGirlPolicy()
         
     def calcTotalProb():
-        pass
+        #This function looks through each ignition event and computes the 
+        #   product of all the suppression/let-burn probabilities.  If the
+        #   USE_LOG_PROB flag is set, it will sum the logged probabilities
+        #   instead.
+
+        total_prob = 0
+
+        if self.USE_LOG_PROB == False:
+            #according to the flag, we're not using sum(log(probs)) so just
+            #  compute the product
+
+            product = 1
+            break_loop = False
+            for ign in self.ignitions:
+
+                try:
+                    product *= ign.getProb()
+                except (ArithmeticError):
+                    #it is possible that a long series of multiplications over fractions
+                    #  could result in an underflow conidtion. Here I'm assuming that is
+                    #  the type of ArithmeticError that we've run into.
+
+                    #since the value underflowed, it is clearly VERY small, so just
+                    # set it to zero
+                    product = 0
+
+                    #and report it
+                    print("a FireGirlLandscape object reports an underflow condition during a PRODUCT calculation")
+
+                    #and don't bother with any more multiplications
+                    break_loop = True
+
+                if break_loop == True: break 
+
+            total_prob = product
+
+        else:
+            #according to the flag, we ARE using sum(log(probs)) so do so:
+            
+            summation = 0
+
+            for ign in self.ignitions:
+                summation += math.ln(ign.getProb())
+
+            try:
+                total_prob = math.exp(summation)
+            except (ArithmeticError):
+                #I'm assuming here that an underflow condition is the only type of
+                #  arithmeticError I'm likely to find...
+
+                #If it underflows, the probability total is very small, so just set
+                #  it to zero
+                total_prob = 0
+
+                #and report it
+                print("a FireGirlLandscape object reports an underflow condition during a SUMMATION calculation")
+
+
+        return total_prob
+
     def getNetValue():
-        pass
+        return self.net_value
+
+    def setYear(year):
+        #this is intended to be used when loading data from saved FireGirl or FireWoman
+        #  data, etc...  FireGirl landscapes will update it themselves when they're evolving.
+        self.year = year
     
     
     ###############################
-    # FireGirl-Specific Functions #
+    # FireGirl-specific Functions #
     ###############################
 
     

@@ -66,9 +66,11 @@ class FireGirlLandscape
 
 
 class FireGirlPolicy
+    function __init__(self, params=None, SETALL=None, COUNT=None)
     function setParams(parameter_list)
     function calcProb(feature_list)
     function logistic(x)
+    function crossProduct()
 
 
 class FireGirlIgnitionRecord

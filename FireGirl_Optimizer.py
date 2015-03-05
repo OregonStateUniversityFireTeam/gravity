@@ -4,7 +4,7 @@ import math
 from scipy.optimize import *
 
 class FireGirlPolicyOptimizer:
-    def __init__(self):
+    def __init__(self, USING_FIREGIRL_LANDSCAPES=True):
         #A list to hold all the landscapes in a data set, whether they represent FireGirl or
         #    FireWoman landscapes
         self.landscape_set = []
@@ -15,11 +15,6 @@ class FireGirlPolicyOptimizer:
         #A list to hold the "probability weights" of each landscape
         self.landscape_weights = []
         
-        #The policy that is controlling each landscape's fire suppression choices
-        #This should be set to one of the two child classes of HKBFire_Policy: 
-        #  FireGirl_Policy or FireWoman_Policy
-        self.Policy = None
-        
         #Boundaries for what the parameters can be set to during scipy's optimization routine:
         self.b_bounds = []
 
@@ -29,11 +24,23 @@ class FireGirlPolicyOptimizer:
 
         #Flag: Using FireGirl landscapes = True
         #      Using FireWoman landscapes = False
-        self.USING_FIREGIRL_LANDSCAPES = True
+        self.USING_FIREGIRL_LANDSCAPES = USING_FIREGIRL_LANDSCAPES
+
+
+        #The policy that is controlling each landscape's fire suppression choices
+        #This should be set to one of the two child classes of HKBFire_Policy: 
+        #  FireGirl_Policy or FireWoman_Policy
+
+        if USING_FIREGIRL_LANDSCAPES == True:
+            #FireGirl uses 10 parameters, so set them all to 1 (coin-toss policy)
+            self.Policy = FireGirlPolicy(None,1,10)
+        else:
+            #FireWoman uses ??? parametres, so set them all to 1 (coin-toss policy)
+            self.Policy = FireGirlPolicy(None,1,30)
 
 
         ##########################################################################################
-        #FireGirl-specific flags and data members. These are ignored if FireWoman-style landscapes
+        #FireGirl-specific flags and data members. These are unused if FireWoman-style landscapes
         #    are being used
         ##########################################################################################
 
@@ -60,6 +67,9 @@ class FireGirlPolicyOptimizer:
 
         #iterating over each landscape and appending each new weigh to the list
         for ls in self.landscape_set:
+
+            #setting the landscape's USE_LOG_PROB flag to match the optimizer's flag
+            ls.USE_LOG_PROB = self.USE_LOG_PROB
         
             #setting this landscape's policy to the current one
             ls.assignPolicy(self.Policy)
@@ -67,9 +77,6 @@ class FireGirlPolicyOptimizer:
             p = ls.calcTotalProb()
 
             self.landscape_weights.append(p)
-        
-            
-        
 
     def calcObjFn(self, b=None):
         #This function contains the optimization objective function. It operates
@@ -90,13 +97,19 @@ class FireGirlPolicyOptimizer:
         # checking for new beta parameters
         if not b == None:
             self.Policy.setParams(b)
-      
+
+        #Note: self.calcLandscapeWeights will assign this policy to each landscape
 
         # Calculate the weights... these will use the current Policy
         #    rather than whatever policy the landscapes used during simulation
         #    Typically, this will be the multiplied total of the inidividual probabilities
         #    associated with following or not-following the policy
         self.calcLandscapeWeights()
+
+        #Note: self.landscape_net_values is being assigned either in:
+        #   1) createFireGirlLandscapes() when those landscapes are first made
+        #   2) loadFireGirlLandscapes() when those landscapes are loaded up
+        #   3) loadFireWomanLandscapes() when those landscapes are loaded up
         
         #a variable to hold the sum of ALL the probability-weighted landscape values
         total_value = 0
@@ -116,7 +129,7 @@ class FireGirlPolicyOptimizer:
         
         return obj_fn_val
 
-    def calcObjFPrime(self, b=None):
+    def calcObjFPrime(self, betas=None):
         #This function returns the gradient of the objective function
 
         #The scipy documentation describes the fprime arguement as:
@@ -135,6 +148,13 @@ class FireGirlPolicyOptimizer:
         #
         #   and where d(logistic(b*f)) = f_l,i,k * logistic(f_l,i,k * b_k) * (1 - logistic(f_l,i,k * b_k))
 
+        #Assign values to b. I don't think this function will ever be called
+        #  outside of the l_bfgs function, but if so, handle it:
+        b = None
+        if betas == None:
+            b = self.Policy.getParams()
+        else:
+            b = betas
 
         # list to hold the final values, one per parameter
         d_obj_d_bk = []
@@ -145,23 +165,66 @@ class FireGirlPolicyOptimizer:
         #iterate over each beta and evaluate the gradient along it
         for beta in range(len(b)):
 
-            #get the total probability for each landscape decision sequence
+            #get the total probability for each landscape decision sequence using the 
+            #   current policy (which is possibly being varied by l_bfgs, etc...)
             self.calcLandscapeWeights()
 
+            #SEE MATHEMATICS DOCUMENTATION FOR A DETAILED EXPLANATION OF ALL THAT FOLLOWS
+
             #variable to hold the sum of the delta(prob)/prop values
-            sum_delta_prob_ = 0
+            sum_delta_prob = 0
 
             for l in range(len(self.landscape_set)):
 
-                for i in range(len(self.landscape_set[l].Logbook.log_list)):
+                #reset value for this landscape
+                sum_delta_prob = 0
 
-                    logistic = FireGirl_Policy.logistic
+                for i in range(self.landscape_set[l].getIgnitionCount()):
 
-                    prob = (sup_i)*logistic()
+                    #making a function handle for ease
+                    logistic = FireGirlPolicy.logistic
 
-                    sum_delta_prob_ += delta_prob / prob
+                    #NOTE: the individual landscapes have already had their policies updated
+                    #  to the current one in self.calcLandscapeWeights()
 
-                d_obj_d_bk[l] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob_
+                    #get the suppression choice of this landscape at this ignition
+                    choice = self.landscape_set[l].getChoice(i)
+                    #and set it to binary
+                    sup = 0
+                    if choice == True: sup = 1
+
+                    #get the new probability (according to the current policy) of suppressing
+                    # this ignition in this landscape
+                    prob_pol = self.landscape_set[l].getProb(i)
+
+                    #set the probability of actually doing what we did
+                    prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
+
+                    #get the cross product of this landscape at this ignition
+                    cross_product = self.landscape_set[l].getCrossProduct(i)
+
+                    #get the feature of this landscape and this ignition for this beta
+                    flik = self.landscape_set[l].getFeature(beta)
+
+
+                    delta_lgstc = flik * logistic(cross_product) * (1 - logistic(cross_product))
+
+                    delta_prob = sup * delta_lgstc + (1 - sup)*(-1)*delta_lgstc
+
+                    sum_delta_prob += delta_prob / prob
+
+                d_obj_d_bk[l] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob
+
+                #going on to the next landscape
+
+            #going on to the next beta
+
+        #finished with all betas
+
+
+        # And Finally, return the list
+        return d_obj_d_bk
+
         
     def optimizePolicy(self, iterations=1, acceptance_threshold=None):
         #This function will work through the given number of gradient descent 
@@ -259,8 +322,8 @@ class FireGirlPolicyOptimizer:
             ls.doYears(years)
             
         #Finish up by calculating the final values of each landscape
-        sumLandscapeValues()
-        pass
+        self.sumLandscapeValues()
+
 
     def sumLandscapeValues(self):
         #This function is unique to the FireGirl model, which does not calculate
@@ -322,6 +385,9 @@ class FireGirlPolicyOptimizer:
         pass
     def loadFireWomanLandscapes(filename):
         #This function loads a saved set of FireWoman Landscapes
+
+        #REMINDER: this function needs to assign values to self.landscape_net_values
+
         pass
     def resetPolicy():
         #This function resets the policy to a 50/50 coin-toss
@@ -341,7 +407,7 @@ class FireGirlPolicyOptimizer:
 ####################################
 
 
-class FireGirl_Optimizer(OptimizerDataSet):
+class FireGirl_Optimizer(FireGirlPolicyOptimizer):
     #This class inherits the generic OptimizerDataSet class for use with
     #  the FireGirl model.
     
