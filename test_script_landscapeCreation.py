@@ -2,8 +2,8 @@ from FireGirl_Landscape import *
 from FireGirl_Policy import *
 import random
 
-pol = FireGirl_Policy()
-lndscp = FireGirl_Landscape(11,pol)
+#pol = FireGirlPolicy()
+lndscp = FireGirlLandscape(11)
 lndscp.generateNewLandscape()
 lndscp.doOneYear()
 lndscp.doOneYear()

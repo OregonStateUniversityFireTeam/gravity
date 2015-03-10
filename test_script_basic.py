@@ -2,9 +2,9 @@ from FireGirl_Landscape import *
 from FireGirl_Policy import *
 import random
 
-pol = FireGirl_Policy()
+pol = FireGirlPolicy(None,0,10) # <- creates a FireGirl-style policy
 
-lndscpe = FireGirl_Landscape(1,pol)
+lndscpe = FireGirlLandscape(1,pol,True)
 
 #testing .drawIgnitionDay()
 no_ig = 0
@@ -144,7 +144,7 @@ print(" ")
 #testing .generateNewLandscape()
 print("TEST 5: .generateNewLandscape()"),
 try:		
-	lndscpe.generateNewLandscape(self)
+	lndscpe.generateNewLandscape()
 	print(": success")
 except:
 	print(": FAILED")
@@ -170,10 +170,13 @@ for i in range(43,86):
 		avet = avef + 1
 		f24 = lndscpe.calcFuelAve24(i,j)
 		t24 = lndscpe.calcTimberAve24(i, j)
+		#print("f24 = " + str(f24) + ", t24 = " + str(t24))
+		#print("avef= " + str(avef) + ", avet= " + str(avet))
 		if not (f24 == avef and t24 == avet):
 			fail24 = True
 			
 		#testing 8's
+		sum = 0
 		for x in range(i-1, i+1):
 			for y in range(j-1,j+1):
 				if not (i == x and j == y):
@@ -185,6 +188,8 @@ for i in range(43,86):
 		avet = avef + 1
 		f8 = lndscpe.calcFuelAve8(i,j)
 		t8 = lndscpe.calcTimberAve8(i, j)
+		#print("f8 = " + str(f8) + ", t8 = " + str(t8))
+		#print("avef= " + str(avef) + ", avet= " + str(avet))
 		if not (f8 == avef and t8 == avet):
 			fail8 = True
 

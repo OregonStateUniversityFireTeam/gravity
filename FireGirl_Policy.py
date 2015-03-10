@@ -30,13 +30,13 @@ class FireGirlPolicy:
                         self.b.append(SETALL)
 
 
-    def setParams(parameter_list):
+    def setParams(self, parameter_list):
         self.b = parameter_list
 
-    def setFeatures(feature_list):
+    def setFeatures(self, feature_list):
         self.features = feature_list
 
-    def getParams():
+    def getParams(self):
         return self.b
 
     def crossProduct(self, feature_list=None):
@@ -49,6 +49,7 @@ class FireGirlPolicy:
             self.features = feature_list
         
         cp = 0
+
         for i in range(len(self.features)):
             cp += self.features[i] * self.b[i]
             

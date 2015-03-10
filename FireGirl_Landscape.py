@@ -37,9 +37,18 @@ class FireGirlLandscape:
 
         self.Policy = None
         if policy_object == None:
-            self.Policy = FireGirlPolicy()
+            #No policy was given, so create a new one:
+            if FIREGIRL_DATA == True:
+                #This is a FireGirl landscape, so make a new policy with 10 parameters
+                self.Policy = FireGirlPolicy(None,0,10)
+            else:
+                #This is a FireWoman landscape, so make a new policy appropriately...
+                self.Policy = FireGirlPolicy(None,0,50) #TODO: HOW MANY FOR FIREWOMAN?
         else:
+            #A policy was passed to the constructor, so just use it and assume the user
+            # set the appropriate number of parameters, etc...
             self.Policy = policy_object
+
 
         # A list of each ignition event, recorded as FireGirlIgnitonRecord objects
         self.ignitions = []
@@ -185,37 +194,46 @@ class FireGirlLandscape:
         else:
             return False
     
-    def getIgnitionCount():
+    def getIgnitionCount(self):
         return len(self.ignitions)
 
-    def getProb(ignition_index):
+    def getProb(self, ignition_index):
         #This function returns it's current Policy's probability calculation for
         #  the ignition at the given index
         f = self.ignitions[ignition_index].getFeatures()
         return self.Policy.calcProb(f)
 
-    def getChoice(ignition_index):
+    def getChoice(self, ignition_index):
         #the choice for any given ignition never changes.
         return self.ignitions[ignition_index].getChoice()
 
-    def getCrossProduct(ignition_index):
+    def getCrossProduct(self, ignition_index):
         #This function returns it's current Policy's crossproduct calculation for
         #  the ignition at the given index
         f = self.ignitions[ignition_index].getFeatures()
         return self.Policy.crossProduct(f)
 
-    def getFeature(i,k):
+    def getFeature(self, ignition_index, k):
         #this function returns the kth feature of the ith ignition
+
+        #checking bounds
+        if ignition_index >= len(self.ignitions):
+            print("Error in FGLandscape.getFeature(i,k): There is no ignition at index i")
+        else:
+            if k >= len(self.ignitions[ignition_index].getFeatures()):
+                print("Error in FGLandscape.getFeature(i,k): There is no feature at index k")
+
+
         return self.ignitions[ignition_index].getFeatures()[k]
 
 
-    def assignPolicy(policy):
+    def assignPolicy(self, policy):
         self.Policy = policy
 
-    def resetPolicy():
+    def resetPolicy(self):
         self.Policy = FireGirlPolicy()
         
-    def calcTotalProb():
+    def calcTotalProb(self):
         #This function looks through each ignition event and computes the 
         #   product of all the suppression/let-burn probabilities.  If the
         #   USE_LOG_PROB flag is set, it will sum the logged probabilities
@@ -276,10 +294,10 @@ class FireGirlLandscape:
 
         return total_prob
 
-    def getNetValue():
+    def getNetValue(self):
         return self.net_value
 
-    def setYear(year):
+    def setYear(self, year):
         #this is intended to be used when loading data from saved FireGirl or FireWoman
         #  data, etc...  FireGirl landscapes will update it themselves when they're evolving.
         self.year = year
@@ -485,14 +503,18 @@ class FireGirlLandscape:
         timber_ave24 = self.calcTimberAve24(xloc, yloc)
         fuel_ave24 = self.calcFuelAve24(xloc, yloc)
         
-        
+        #OLD POLICY TYPE
         #for reference, the Policy object function signature i'm using:
         #def self.setValues  (  windspeed,        temp,        date, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24)
-        self.Policy.setValues(ignite_wind, ignite_temp, ignite_date, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24)
-        
+        #self.Policy.setValues(ignite_wind, ignite_temp, ignite_date, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24)  
         #I'm assuming that the Policy object has already loaded the appropriate parameters
-        pol_val = self.Policy.evaluateSuppressionProbability()
-        
+        #pol_val = self.Policy.evaluateSuppressionProbability()
+
+        d2 = ignite_date * ignite_date
+        features = [ignite_date, d2, ignite_temp, ignite_wind, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24]
+        #self.Policy.setFeatures(features) #Un-needed
+        pol_val = self.Policy.calcProb(features)
+
         return pol_val
         
     def calcFireSpreadRate(self, wind, temp, fuel):
@@ -801,10 +823,10 @@ class FireGirlLandscape:
             self.Logbook.updateFuelAve24   (self.year, self.calcFuelAve24(x,y)   )
         
             #recording in the new ignition object type
-            features = [ignite_date, ignite_loc, ignite_temp, ignite_wind,
+            features = [ignite_date, (ignite_date*ignite_date), ignite_temp, ignite_wind,
                         self.timber_value[x][y], self.calcTimberAve8(x,y), self.calcTimberAve24(x,y),
                         self.fuel_load[x][y], self.calcFuelAve8(x,y), self.calcFuelAve24(x,y)]
-            f_labels = ["date", "location", "temperature", "wind speed", 
+            f_labels = ["date", "date squared", "temperature", "wind speed", 
                         "timber value", "timber value, ave8", "timber value, ave24", 
                         "fuel load", "fuel load, ave8", "fuel load, ave 24" ]
             firerecord_new.setFeatures(features)

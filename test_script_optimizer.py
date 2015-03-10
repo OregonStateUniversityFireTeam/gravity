@@ -1,19 +1,19 @@
 from FireGirl_Optimizer import *
 
-myOptim = FireGirl_Optimizer()
+myOptim = FireGirlPolicyOptimizer()
 
 #testing __init__
-print("Testing __init__.  Bounds should be 10 (-10,10) pairs")
-print(myOptim.b_bounds)
-print(" ")
+#print("Testing __init__.  Bounds should be 10 (-10,10) pairs")
+#print(myOptim.b_bounds)
+#print(" ")
 
 #testing landscape creation
 print("Testing Landscape Creation")
 #def createNewDataSet(self, landscape_count, years_per_landscape, policy=None):
-myOptim.createNewDataSet(10, 20)
+myOptim.createFireGirlLandscapes(10, 20)
 print("landscapes created: " + str(len(myOptim.landscape_set)) + " out of 10")
 for ls in range(10):
-    print("  landscape " + str(ls) + "has " + str(len(myOptim.landscape_set[ls].log_list)) + " logbook entries.")
+    print("  landscape " + str(ls) + " has " + str(myOptim.landscape_set[ls].getIgnitionCount()) + " logbook entries.")
 print(" ")
 
 

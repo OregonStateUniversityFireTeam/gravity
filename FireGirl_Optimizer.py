@@ -17,6 +17,9 @@ class FireGirlPolicyOptimizer:
         
         #Boundaries for what the parameters can be set to during scipy's optimization routine:
         self.b_bounds = []
+        if USING_FIREGIRL_LANDSCAPES == True:
+            for i in range(10):
+                self.b_bounds.append([-10,10])
 
         #Flag: Use log(probabilities)  -  If we want to force sums of log(probs), set to True
         #                                 To just multiply probabilities, set to False
@@ -182,7 +185,8 @@ class FireGirlPolicyOptimizer:
                 for i in range(self.landscape_set[l].getIgnitionCount()):
 
                     #making a function handle for ease
-                    logistic = FireGirlPolicy.logistic
+                    spare_pol = FireGirlPolicy()
+                    logistic = spare_pol.logistic
 
                     #NOTE: the individual landscapes have already had their policies updated
                     #  to the current one in self.calcLandscapeWeights()
@@ -204,7 +208,7 @@ class FireGirlPolicyOptimizer:
                     cross_product = self.landscape_set[l].getCrossProduct(i)
 
                     #get the feature of this landscape and this ignition for this beta
-                    flik = self.landscape_set[l].getFeature(beta)
+                    flik = self.landscape_set[l].getFeature(i, beta)
 
 
                     delta_lgstc = flik * logistic(cross_product) * (1 - logistic(cross_product))
@@ -264,8 +268,8 @@ class FireGirlPolicyOptimizer:
         	# bounds should be a list of upper and lower bound pairs. See scipy.optimize.fmin_l_bfgs_b documentation.
         	# The rest of the arguments are left as defaults.
             
-            #               arg names:    func                  x0             fprime, args, approx_grad, bounds
-            output_policy = fmin_l_bfgs_b(self.calcObjectiveFn, self.Policy.b, None,   [],   True,       self.b_bounds)
+            #               arg names:    func            x0             fprime,               args, approx_grad, bounds
+            output_policy = fmin_l_bfgs_b(self.calcObjFn, self.Policy.b, self.calcObjFPrime,   [],   False,       self.b_bounds)
             
             #the output of fmin_l_bfgs_b() has the following structure: [x, f, d], where:
             #   x : array_like
@@ -297,7 +301,7 @@ class FireGirlPolicyOptimizer:
     ###############################
     # FireGirl-specific Functions #
     ###############################
-    def createFireGirlLandscapes(landscape_count, years, policy=None):
+    def createFireGirlLandscapes(self, landscape_count, years, policy=None):
         #This function creates a new set of FireGirl-style landscapes (deleting all current
         #    landscape data)
 
@@ -305,7 +309,7 @@ class FireGirlPolicyOptimizer:
         #Check if we need a new policy, or if one was passed in
         if policy == None:
             #no policy passed, so create a new one
-            self.Policy = FireGirlPolicy()
+            self.Policy = FireGirlPolicy(None,0,10)
         
         #Clear the landscape_set list in case there's old landscapes in it
         self.landscape_set = []
@@ -380,19 +384,19 @@ class FireGirlPolicyOptimizer:
     ###################
     # Other Functions #
     ###################
-    def loadFireGirlLandscapes(filename):
+    def loadFireGirlLandscapes(self, filename):
         #This function loads a saved set of FireGirl Landscapes
         pass
-    def loadFireWomanLandscapes(filename):
+    def loadFireWomanLandscapes(self, filename):
         #This function loads a saved set of FireWoman Landscapes
 
         #REMINDER: this function needs to assign values to self.landscape_net_values
 
         pass
-    def resetPolicy():
+    def resetPolicy(self):
         #This function resets the policy to a 50/50 coin-toss
         pass
-    def loadPolicy(filename):
+    def loadPolicy(self, filename):
         #This function loads a saved policy and assigns it to this optimization object
         pass
     

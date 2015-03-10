@@ -38,37 +38,37 @@ class FireGirlIgnitionRecord:
     def getChoice(self):
         return self.policy_choice
 
-    def getFeatures():
+    def getFeatures(self):
         return self.features
 
-    def getOutcomes():
+    def getOutcomes(self):
         return self.outcomes
 
-    def getFeatureLabels():
+    def getFeatureLabels(self):
         return self.feature_labels
 
-    def getOutcomeLabels():
+    def getOutcomeLabels(self):
         return self.outcome_labels
 
-    def setYear(year):
+    def setYear(self, year):
         self.year = year
 
-    def setChoice(choice):
+    def setChoice(self, choice):
         self.policy_choice = choice
 
-    def setProb(prob):
+    def setProb(self, prob):
         self.policy_prob = prob
 
-    def setFeatures(feature_list):
+    def setFeatures(self, feature_list):
         self.features = feature_list
 
-    def setOutcomes(outcome_list):
+    def setOutcomes(self, outcome_list):
         self.outcomes = outcome_list
 
-    def setFeatureLabels(labels):
+    def setFeatureLabels(self, labels):
         self.feature_labels = labels
 
-    def setOutcomeLabels(labels):
+    def setOutcomeLabels(self, labels):
         self.outcome_labels = labels
 
 
