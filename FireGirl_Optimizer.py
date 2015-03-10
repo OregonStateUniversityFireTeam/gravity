@@ -1,6 +1,6 @@
 from FireGirl_Landscape import *
 from FireGirl_Policy import *
-import math
+import math, scipy
 from scipy.optimize import *
 
 class FireGirlPolicyOptimizer:
@@ -204,14 +204,14 @@ class FireGirlPolicyOptimizer:
                     #set the probability of actually doing what we did
                     prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
 
+                    #checking for unreasonably small probabilities
+                    if prob == 0:
+                        prob = 0.00001
+
                     #get the cross product of this landscape at this ignition
                     cross_product = self.landscape_set[l].getCrossProduct(i)
 
                     #get the feature of this landscape and this ignition for this beta
-                    print(self.landscape_set[l].ignitions[i].feature_labels)
-                    print(self.landscape_set[l].ignitions[i].features)
-                    print(self.landscape_set[l].ignitions[i].outcome_labels)
-                    print(self.landscape_set[l].ignitions[i].outcomes)
                     flik = self.landscape_set[l].getFeature(i, beta)
 
 
@@ -229,9 +229,14 @@ class FireGirlPolicyOptimizer:
 
         #finished with all betas
 
+        # because this is a minimization routine, and the objective function is being flipped, so too
+        #should be the derivatives
+        for b in range(len(d_obj_d_bk)):
+            d_obj_d_bk[b] *= -1
+
 
         # And Finally, return the list
-        return d_obj_d_bk
+        return scipy.array(d_obj_d_bk)
 
         
     def optimizePolicy(self, iterations=1, acceptance_threshold=None):
@@ -272,8 +277,11 @@ class FireGirlPolicyOptimizer:
         	# bounds should be a list of upper and lower bound pairs. See scipy.optimize.fmin_l_bfgs_b documentation.
         	# The rest of the arguments are left as defaults.
             
-            #               arg names:    func            x0             fprime,               args, approx_grad, bounds
-            output_policy = fmin_l_bfgs_b(self.calcObjFn, self.Policy.b, self.calcObjFPrime,   [],   False,       self.b_bounds)
+            #converting to numpy arrays
+            x0 = scipy.array(self.Policy.b)
+
+            #               arg names:    func            x0  fprime,               args, approx_grad, bounds
+            output_policy = fmin_l_bfgs_b(self.calcObjFn, x0, self.calcObjFPrime,   [],   False,       self.b_bounds)
             
             #the output of fmin_l_bfgs_b() has the following structure: [x, f, d], where:
             #   x : array_like

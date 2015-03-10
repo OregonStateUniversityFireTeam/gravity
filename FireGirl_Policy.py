@@ -57,13 +57,26 @@ class FireGirlPolicy:
 
     def logistic(self, value):
         #This function calculates the simple logistic function value of the input
-        return (  1 / (1 + math.exp(-value))  )   
+        try:
+            return (  1 / (1 + math.exp(-value))  )
+        except(OverflowError):
+            #print("FireGirlPolicy.logistic() encountered and overflow error: returning 0")
+
+            #an overflow error can only happen when value is very negative, resulting in too
+            #  high a exp() value. In turn, this means the division goes to zero, as expected
+            #  for a logistic function.
+            return 0
     
     def calcProb(self, feature_list):
         self.features = feature_list
         cp = self.crossProduct()
-        prob = self.logistic(cp)
-        return prob
+        try:
+            return self.logistic(cp)
+        except(OverflowError):
+            print("FGPolicy.calcProb() encountered and overflow error:")
+            print("  crossproduct is: " + str(cp))
+            return 0
+
 
     ## DEPRECATING ##
     def evaluateSuppressionProbability(self):

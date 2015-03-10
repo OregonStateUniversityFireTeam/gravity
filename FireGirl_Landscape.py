@@ -253,6 +253,11 @@ class FireGirlLandscape:
 
                 try:
                     product *= ign.getProb()
+                except (TypeError):
+                    print("FGLandscape.calcTotalProb() encountered a TypeError:")
+                    print(" ignition.getProb() returns: " + str(ign.getProb()))
+                    print(" ignition.features are:")
+                    print(ign.features)
                 except (ArithmeticError):
                     #it is possible that a long series of multiplications over fractions
                     #  could result in an underflow conidtion. Here I'm assuming that is
@@ -516,6 +521,8 @@ class FireGirlLandscape:
         features = [ignite_date, d2, ignite_temp, ignite_wind, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24]
         #self.Policy.setFeatures(features) #Un-needed
         pol_val = self.Policy.calcProb(features)
+        if pol_val == None:
+            print("Error: Invalid type for policy probability: type = None")
 
         return pol_val
         
