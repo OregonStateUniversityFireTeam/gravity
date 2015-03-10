@@ -208,6 +208,10 @@ class FireGirlPolicyOptimizer:
                     cross_product = self.landscape_set[l].getCrossProduct(i)
 
                     #get the feature of this landscape and this ignition for this beta
+                    print(self.landscape_set[l].ignitions[i].feature_labels)
+                    print(self.landscape_set[l].ignitions[i].features)
+                    print(self.landscape_set[l].ignitions[i].outcome_labels)
+                    print(self.landscape_set[l].ignitions[i].outcomes)
                     flik = self.landscape_set[l].getFeature(i, beta)
 
 

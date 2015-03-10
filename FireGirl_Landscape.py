@@ -222,6 +222,8 @@ class FireGirlLandscape:
         else:
             if k >= len(self.ignitions[ignition_index].getFeatures()):
                 print("Error in FGLandscape.getFeature(i,k): There is no feature at index k")
+                print(" -feature list has " + str(len(self.ignitions[ignition_index].getFeatures())) + " elements.")
+                print(" -function call requesting element at index " + str(k))
 
 
         return self.ignitions[ignition_index].getFeatures()[k]
@@ -803,6 +805,7 @@ class FireGirlLandscape:
         
         #For recording in the new ignition object type
         firerecord_new = FireGirlIgnitionRecord()
+        firerecord_new.year = self.year
 
         ignite_wind = 0
         ignite_temp = 0
@@ -902,7 +905,10 @@ class FireGirlLandscape:
         ##########################
 
         #adding new ignition record object to the appropriate list.
-        self.ignitions.append(firerecord_new)
+        #but first check for empty records
+        if not firerecord_new.getFeatures() == []:  #this will happen if there was ever a no-ignition event.
+            #there is a record, so append it.
+            self.ignitions.append(firerecord_new)
 
 
         #Finally, advance the year by one.
