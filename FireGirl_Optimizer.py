@@ -676,7 +676,7 @@ class FireGirl_Optimizer(FireGirlPolicyOptimizer):
         
         return obj_fn_val
     
-class FireWoman_Optimizer(OptimizerDataSet):
+class FireWoman_Optimizer(FireGirlPolicyOptimizer):
     #This class inherits from the OptimizerDataSet class and is designed
     #  to interact specifically with FireWoman data.
     

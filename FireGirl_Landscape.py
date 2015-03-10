@@ -206,7 +206,7 @@ class FireGirlLandscape:
 
     def getFeature(i,k):
         #this function returns the kth feature of the ith ignition
-        return self.ignitions[ignition_index].getFeatures().[k]
+        return self.ignitions[ignition_index].getFeatures()[k]
 
 
     def assignPolicy(policy):
@@ -779,6 +779,9 @@ class FireGirlLandscape:
         x = ignite_loc[0]
         y = ignite_loc[1]
         
+        #For recording in the new ignition object type
+        firerecord_new = FireGirlIgnitionRecord()
+
         ignite_wind = 0
         ignite_temp = 0
         if ignite_date > 0:
@@ -797,6 +800,16 @@ class FireGirlLandscape:
             self.Logbook.updateFuelAve8    (self.year, self.calcFuelAve8(x,y)    )
             self.Logbook.updateFuelAve24   (self.year, self.calcFuelAve24(x,y)   )
         
+            #recording in the new ignition object type
+            features = [ignite_date, ignite_loc, ignite_temp, ignite_wind,
+                        self.timber_value[x][y], self.calcTimberAve8(x,y), self.calcTimberAve24(x,y),
+                        self.fuel_load[x][y], self.calcFuelAve8(x,y), self.calcFuelAve24(x,y)]
+            f_labels = ["date", "location", "temperature", "wind speed", 
+                        "timber value", "timber value, ave8", "timber value, ave24", 
+                        "fuel load", "fuel load, ave8", "fuel load, ave 24" ]
+            firerecord_new.setFeatures(features)
+            firerecord_new.setFeatureLabels(f_labels)
+
         
         
         ##################################
@@ -819,6 +832,10 @@ class FireGirlLandscape:
             #recording suppression data in the Logbook
             self.Logbook.updateSuppressProb(self.year, suppress_prob)
             self.Logbook.updateSuppressDecision(self.year, suppress_decision)
+
+            #recording suppression data in the new logbook type
+            firerecord_new.setChoice(suppress_decision)
+            firerecord_new.setProb(suppress_prob)
         
         
         
@@ -837,8 +854,13 @@ class FireGirlLandscape:
             timber_loss = fireresults[0]
             cells_burned = fireresults[1]
             
+            #recording outcomes
             self.Logbook.updateTimberLoss(self.year, timber_loss)
             self.Logbook.updateCellsBurned(self.year, cells_burned)
+
+            #recording outcomes in new object type
+            firerecord_new.setOutcomes([timber_loss, cells_burned])
+            firerecord_new.setOutcomeLabels(["timber loss", "cells burned"])
         
         
         ##############################
@@ -853,7 +875,14 @@ class FireGirlLandscape:
     
         #TODO
         
-        
+        ##########################
+        ### Finalization Steps ###
+        ##########################
+
+        #adding new ignition record object to the appropriate list.
+        self.ignitions.append(firerecord_new)
+
+
         #Finally, advance the year by one.
         #print("Finishing Year " + str(self.year))
         self.year += 1

@@ -27,6 +27,10 @@ class FireGirlIgnitionRecord:
         self.outcomes = []
         self.feature_labels = []
         self.outcome_labels = []
+        self.year = 0
+
+    def getYear(self):
+        return self.year
 
     def getProb(self):
         return self.policy_prob
@@ -45,6 +49,15 @@ class FireGirlIgnitionRecord:
 
     def getOutcomeLabels():
         return self.outcome_labels
+
+    def setYear(year):
+        self.year = year
+
+    def setChoice(choice):
+        self.policy_choice = choice
+
+    def setProb(prob):
+        self.policy_prob = prob
 
     def setFeatures(feature_list):
         self.features = feature_list
