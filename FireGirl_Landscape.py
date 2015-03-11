@@ -163,7 +163,7 @@ class FireGirlLandscape:
             #   fire spread.  If there's not enough fuel to sustain a fire, there will 
             #   not be any fire spread
             self.min_spread_windtemp = 0 # this enforces a rule that w+t is positive.
-            self.ming_spread_fuel = 10 #fuel ranges from 0 to 100, so this is the very
+            self.min_spread_fuel = 10 #fuel ranges from 0 to 100, so this is the very
                                        #  lowest range.
             
             
@@ -177,6 +177,48 @@ class FireGirlLandscape:
             self.crownfire_param_outputscale = 1
             self.crownfire_param_zeroadjust = 5
             self.crownfire_param_smoothness = 1
+
+
+
+            #### SUPPRESSION MODEL
+            # a list to hold each year's suppression costs
+            self.yearly_suppression_costs
+
+            #for the end-of-fire time, this is the average "days" it takes. This actually
+            # effects the time that will be allowed to the fire spreading model before it cuts itself
+            # off.
+            self.fire_average_end_day = 2
+
+            #How much does suppression reduce the fire spread rate:
+            self.fire_suppression_rate = 0.5
+
+            #how much does it cost to suppress a fire?
+            self.fire_suppression_cost_per_cell = 100
+            self.fire_suppression_cost_per_day = 0
+
+
+
+            #### TREE GROWTH MODEL ####
+            self.growth_timber_constant = 22.0
+            self.growth_fuel_accumulation = 2
+
+            #a list to hold each year's total landscape growth amount
+            self.yearly_growth_totals = []
+
+
+            #### LOGGING MODEL ####
+            #a list to hold each year's logging total
+            self.yearly_logging_totals = []
+
+
+            #logging site block width
+            self.logging_block_width = 10
+            #the logging model will not cut stands under this timber value
+            self.logging_min_value = 75  #30-yr-old stands should have a value of about 75
+            #the logging model will leave this much fuel_load as "slash" after it cuts a stand
+            self.logging_slash_remaining = 10
+            #the logging model will cut this percent of the years total timber growth
+            self.logging_percentOfIncrement = 0.95
 
 
 
@@ -394,9 +436,12 @@ class FireGirlLandscape:
         #The function signature is:
         #random.expovariate(lambd) where lambd should be (1 / mean)
         
-        #return random.expovariate(1 / self.wind_mean)
+        #return random.expovariate(1 / self.wind_mean) #this wasn't working, apparently?
         return (random.expovariate(1) * self.wind_mean)
-        
+    
+    def drawEndOfFire(self):
+        return (random.expovariate(1 / self.fire_average_end_day))
+
     def generateNewLandscape(self):
         #This function will erase all current data in this landscape and 
         #  generate new values for timber/fuels, etc... It will also reset the 
@@ -542,7 +587,7 @@ class FireGirlLandscape:
         #Enforcing minimum spread restrictions
         if (wind + temp) < self.min_spread_windtemp:
             fspread = 0
-        if fuel < self.ming_spread_fuel:
+        if fuel < self.min_spread_fuel:
             fspread = 0
         
         return fspread
@@ -565,6 +610,26 @@ class FireGirlLandscape:
         cf_risk = out_scale / (1 + math.exp(exponent))
         
         return cf_risk
+
+
+    def getHarvestTotal(self):
+
+        total = 0
+
+        for entry in self.yearly_logging_totals:
+            total += entry
+
+        return total
+
+    def getSuppressionTotal(self):
+
+        total = 0
+
+        for entry in self.yearly_suppression_costs:
+            total += entry
+
+        return total
+
 
 
     def doFire(self, ignite_date, ignite_loc, ignite_wind, ignite_temp, suppress):
@@ -590,8 +655,7 @@ class FireGirlLandscape:
         fire_log_item = FireGirl_FireLog(self.year)
         
         
-        end_time = 10 #TODO probably do the real one with an exponential for let-burn
-        #               and another one for suppress
+        end_time = self.drawEndOfFire()
         
         current_time = 0
         
@@ -664,6 +728,10 @@ class FireGirlLandscape:
             #Calculating this cell's fire spreadrate, which needs it's fuel load, too
             fuel_ld = self.fuel_load[xloc][yloc]
             spreadrate = self.calcFireSpreadRate(ignite_wind, ignite_temp, fuel_ld)
+
+            #add the effects of suppression
+            if suppress == True:
+                spreadrate *= self.fire_suppression_rate 
 
             
             # Check if the crown will burn (if the spreadrate is > 0)
@@ -775,10 +843,147 @@ class FireGirlLandscape:
         
         #add the FireLog item to the landscape's list (it's just an ordinary list)
         self.FireLog.append(fire_log_item)
+
+
+        #add up suppression cost and record it
+        sup_cost = 0
+        if suppress == True:
+            sup_cost +=  cells_burned * self.fire_suppression_cost_per_cell
+            sup_cost +=      end_time * self.fire_suppression_cost_per_day
+
+        self.yearly_suppression_costs.append(sup_cost)
         
+
         #and finally, return the loss data
-        return [timber_loss, cells_burned]
+        return [timber_loss, cells_burned, sup_cost]
                     
+    def doGrowth(self):
+        #This function applies the timber and fuel load growth models to all cells on the landscape,
+        #  including those outside of the window of interest.
+
+        #The current model is simply:  
+        #       timber value next year = constant * ln(timber age next year)
+        #
+        # and to comput age this year, just invert:
+        #       timber age this year = exp(timber value this year / constant)
+        #
+        # so first find the current age, then add one, and then find next year's timber value
+
+
+        #declaring loop variables
+        age = 0
+        old_val = 0
+        new_val = 0
+
+        #to record total growth this year (by use in the logging model, etc...)
+        total_growth = 0.0
+
+        #loop over every cell
+        for i in range(self.width):
+            for j in range(self.height):
+
+                # 1) Apply timber growth equation:
+
+                #calculate current age
+                age = math.exp(self.timber_value[i][j] / self.growth_timber_constant)
+                #and apply the timber value for the new age
+                old_val = self.timber_value[i][j]
+                new_val = self.growth_timber_constant * math.ln(age + 1)
+                self.timber_value[i][j] = new_val
+
+                #and record this growth as part of the year's total growth
+                total_growth += (new_val - old_val)
+
+
+                # 2) Apply fuel accumulation model:
+                self.fuel_load[i][j] += self.growth_fuel_accumulation
+
+
+
+        #record this year's yearly growth total
+        self.yearly_growth_totals.append(total_growth)
+
+    def doLogging_one_block(self, x, y, timber_limit):
+        #this function will cut stands in the block given, starting at (x,y), and using
+        #   self.logging_block_width to determine the block size. It will cut stands
+        #   until it has met or exceeded timber_limit in cut value. When it has reached
+        #   the end of the block, or met the timber_limit quota, it will stop, and return
+        #   the total value cut.
+
+        total_cut = 0
+        done_cutting = False
+
+        #start loop at (x,y) and move over the block defined by self.logging_block_width, etc...
+        for i in range(x, self.logging_block_width):
+            
+            #check for stop condition
+            if done_cutting == True: break
+
+            for j in range(y, self.logging_block_width):
+
+                #check for stop condition
+                if done_cutting == True: break
+
+                #check if this stand is at least the minimum value
+                if self.timber_value[i][j] >= self.logging_min_value:
+                    
+                    #this stand is eligible to be cut, so do it, and record the total
+                    total_cut += self.timber_value[i][j]
+                    self.timber_value[i][j] = 0
+
+                    #and "burn the slash"
+                    self.fuel_load[i][j] = self.logging_slash_remaining
+
+                    #check if we've hit our limit
+                    if total_cut >= timber_limit:
+                        #we have, so break out of the for loops
+                        done_cutting = True
+
+
+        #finished looping, so return the total amoutn cut
+        return total_cut
+
+    def doLogging(self):
+        #This function starts cutting timber in randomly selected blocks within the window
+        #  of interest until the self-imposed logging limit has been reached. The logging limit
+        #  is set to a percentage of the year's accumulated growth, as calculated by the 
+        #  growth model.  The model will not cut stands under a certain value. For instance,
+        #  at an age of 30, stands have a value of about 75, so potentially no stands under a
+        #  value of 75 (or whatever is set by the user in the class constructor) will be harvested
+        #  in the current block
+        #
+        #If the current block does not have enough harvestable timber to meet the quota, then
+        #  whatever remains of the quota will be looked for in a new harvest block (which may
+        #  or may not overlap the current one; it's random), and so on.
+
+
+        #get this year's maximum allowed cut: It will be the last entry in the tree growth 
+        #  list
+        max_cut = self.yearly_growth_totals[len(self.yearly_growth_totals)-1]
+
+        #reduce maximum according to logging model parameters
+        max_cut = max_cut * self.logging_percentOfIncrement
+
+        # Cut stands in this block until
+        #   a) enough timber has been cut for the year
+        #   b) there are no more eligible stands
+        total_cut = 0
+
+        while True:
+            if total_cut >= max_cut: break
+
+            # Select a logging block such that the whole block will fit within the window
+            #     of interest
+            x = random.randint(43, 86-self.logging_block_width )
+            y = random.randint(43, 86-self.logging_block_width )
+
+            #cut a new block, allowing whatever remains of our current logging limit to be cut
+            total_cut += self.doLogging_one_block( x, y, (max_cut - total_cut) )
+
+
+        # Report logging results
+        self.yearly_logging_totals.append(total_cut)
+        
 
 
     def doOneYear(self):
@@ -881,31 +1086,32 @@ class FireGirlLandscape:
             #there is an ignition, so:
             
             # Invoke the fire model and record it's return value, which is in the
-            # form:  [timber_loss, cells_burned]
+            # form:  [timber_loss, cells_burned, sup_cost]
             fireresults = self.doFire(ignite_date, ignite_loc, ignite_wind, ignite_temp, suppress_decision)
             timber_loss = fireresults[0]
             cells_burned = fireresults[1]
+            sup_cost = fireresults[2]
             
             #recording outcomes
             self.Logbook.updateTimberLoss(self.year, timber_loss)
             self.Logbook.updateCellsBurned(self.year, cells_burned)
 
             #recording outcomes in new object type
-            firerecord_new.setOutcomes([timber_loss, cells_burned])
-            firerecord_new.setOutcomeLabels(["timber loss", "cells burned"])
+            firerecord_new.setOutcomes([timber_loss, cells_burned, sup_cost])
+            firerecord_new.setOutcomeLabels(["timber loss", "cells burned", "suppression cost"])
         
         
         ##############################
         ### STEP 4 - LOGGING MODEL ###
         ##############################
         
-        #TODO
+        self.doLogging()
         
         #################################
         ### STEP 5 - ECOLOGICAL MODEL ###
         #################################
     
-        #TODO
+        self.doGrowth()
         
         ##########################
         ### Finalization Steps ###

@@ -49,7 +49,7 @@ class FireGirlPolicyOptimizer:
 
         #A flag for whether or not to include ending landscapes' standing timber
         #   value in the total landscape value
-        self.count_standing_timber = True
+        self.count_standing_timber = False
       
 
 
@@ -370,7 +370,8 @@ class FireGirlPolicyOptimizer:
                 if not entry.timber_loss == None:
                     #subtracting timber losses from crown fires
                     net_val -= entry.timber_loss
-                    
+                
+                #these are never reported...
                 if not entry.logging_total == None:
                     #adding values from logging
                     net_val += entry.logging_total
@@ -382,7 +383,13 @@ class FireGirlPolicyOptimizer:
                 for i in range(43,86):
                     for j in range(43,86):
                         net_val += self.landscape_set[ls].timber_value[i][j]
-            
+
+
+            #Add Up logging totals, since they are not reported above
+            net_val += self.landscape_set[ls].getHarvestTotal()
+            net_val -= self.landscape_set[ls].getSuppressionCost()
+
+
             #before we go on to the next landscape, add this value to the net
             #  value list at the same index as the landscape is in the landscape_set list
             #  
@@ -423,7 +430,7 @@ class FireGirlPolicyOptimizer:
 ####################################
 
 
-class FireGirl_Optimizer(FireGirlPolicyOptimizer):
+class DEPRECATED_FireGirl_Optimizer(FireGirlPolicyOptimizer):
     #This class inherits the generic OptimizerDataSet class for use with
     #  the FireGirl model.
     
@@ -692,7 +699,7 @@ class FireGirl_Optimizer(FireGirlPolicyOptimizer):
         
         return obj_fn_val
     
-class FireWoman_Optimizer(FireGirlPolicyOptimizer):
+class DEPRECATED_FireWoman_Optimizer(FireGirlPolicyOptimizer):
     #This class inherits from the OptimizerDataSet class and is designed
     #  to interact specifically with FireWoman data.
     
