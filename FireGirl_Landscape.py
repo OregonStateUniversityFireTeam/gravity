@@ -123,7 +123,7 @@ class FireGirlLandscape:
             
             # ignition probability: the likelihood of there being an important fire on
             #   any given year
-            self.ignition_prob = 1
+            self.ignition_prob = 100
             
             # temperature variables: These variables control the temperature average and
             #    mean, throughout the year. They are based on a cosine distribution (for
@@ -214,7 +214,7 @@ class FireGirlLandscape:
             #logging site block width
             self.logging_block_width = 10
             #the logging model will not cut stands under this timber value
-            self.logging_min_value = 75  #30-yr-old stands should have a value of about 75
+            self.logging_min_value = 50  #30-yr-old stands should have a value of about 75
             #the logging model will leave this much fuel_load as "slash" after it cuts a stand
             self.logging_slash_remaining = 10
             #the logging model will cut this percent of the years total timber growth
@@ -682,7 +682,7 @@ class FireGirlLandscape:
                 crown_burned[i].append(False)
                 
         #start the queue loop
-        iter_cap = 1500
+        iter_cap = 5000
         iter_count = 0
         while True:
             #failsafe exit
@@ -1029,7 +1029,7 @@ class FireGirlLandscape:
 
         ignite_wind = 0
         ignite_temp = 0
-        if ignite_date > 0:
+        if ignite_date >= 0:
             ignite_wind = self.drawWindSpeed(ignite_date)
             ignite_temp = self.drawTemperature(ignite_date)
             
@@ -1133,6 +1133,21 @@ class FireGirlLandscape:
         if not firerecord_new.getFeatures() == []:  #this will happen if there was ever a no-ignition event.
             #there is a record, so append it.
             self.ignitions.append(firerecord_new)
+        else:
+            print("no ignition???")
+
+            print firerecord_new.feature_labels 
+            print firerecord_new.features
+            print firerecord_new.outcome_labels 
+            print firerecord_new.outcomes 
+            print("prob: "),
+            print firerecord_new.policy_prob  
+            print("choice: "),
+            print firerecord_new.policy_choice  
+            print("year: "),
+            print firerecord_new.year 
+            print("burn time: "),
+            print firerecord_new.burn_time
 
 
         #Finally, advance the year by one.
