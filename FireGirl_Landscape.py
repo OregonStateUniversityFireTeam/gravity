@@ -613,6 +613,22 @@ class FireGirlLandscape:
         return cf_risk
 
 
+    def getTimberLossTotal(self):
+        #This function looks through all the fires that have occurred and adds up their
+        # losses in timber values
+
+        loss = 0
+        #look through past ignitions and add up timber loss
+        for ign in self.ignitions:
+            #the following line is used when the fire outcomes are recorded
+            #firerecord_new.setOutcomes([timber_loss, cells_burned, sup_cost, end_time])
+            outcomes = ign.getOutcomes()
+
+            #subtract timber loss
+            loss += outcomes[0]
+
+        return loss
+
     def getHarvestTotal(self):
 
         total = 0
@@ -631,7 +647,20 @@ class FireGirlLandscape:
 
         return total
 
+    def updateNetValue(self):
+        #This function makes the landscape go through it's full history and add/subtract up 
+        #  all the costs and gains it's incurred in it's history. This value is then
+        #  assigned to self.net_value, and also returned to the function caller.
 
+        #reset net value
+        self.net_value = 0
+
+        #add/subtract up the various components
+        self.net_value = self.getHarvestTotal() - self.getSuppressionTotal() - self.getTimberLossTotal()
+
+        #the value is already assigned to the local variable, but also return it:
+        return self.net_value
+        
 
     def doFire(self, ignite_date, ignite_loc, ignite_wind, ignite_temp, suppress):
         #This function is the fire model. Given the input arguments, it will
