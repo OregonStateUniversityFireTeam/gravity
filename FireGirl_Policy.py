@@ -123,18 +123,19 @@ class FireGirlPolicy_DEPRECATING(FireGirlPolicy):
     def crossProduct(self):
         #OVERRIDING parent class function of the same name.  This child class
         #  does not use the self.features list, but instead uses the individual 
-        #  values, since there are only 10 of them.
+        #  values, since there are only 11 of them.
         
-        cp =  ( self.windspeed    * self.b[0]  +
-                self.temperature  * self.b[1]  +
-                self.date         * self.b[2]  +
-                self.date2        * self.b[3]  +
-                self.timber_val   * self.b[4]  +
-                self.timber_ave8  * self.b[5]  +
-                self.timber_ave24 * self.b[6]  +
-                self.fuel         * self.b[7]  +
-                self.fuel_ave8    * self.b[8]  +
-                self.fuel_ave24   * self.b[9]    )
+        cp =  ( 1                 * self.b[0]  +
+                self.windspeed    * self.b[1]  +
+                self.temperature  * self.b[2]  +
+                self.date         * self.b[3]  +
+                self.date2        * self.b[4]  +
+                self.timber_val   * self.b[5]  +
+                self.timber_ave8  * self.b[6]  +
+                self.timber_ave24 * self.b[7]  +
+                self.fuel         * self.b[8]  +
+                self.fuel_ave8    * self.b[9]  +
+                self.fuel_ave24   * self.b[10]    )
         
         return cp
     
@@ -171,7 +172,7 @@ class FireGirlPolicy_DEPRECATING(FireGirlPolicy):
         
     
     def loadParameters(self, filename):
-        #This function loads the 10 policy parameters from a file.
+        #This function loads the 11 policy parameters from a file.
         #The file format is as follows:
         #
         #All ten values should be on one line, deliminated by commas
@@ -185,11 +186,11 @@ class FireGirlPolicy_DEPRECATING(FireGirlPolicy):
         file.close()
         
         input_vals = input_string.split(",")
-        if len(input_vals) < 10:
+        if len(input_vals) < 11:
             print("File Read Error: Too few policy parameters in file " + filename)
             return False
         else:
-            for i in range(10):
+            for i in range(11):
                 #converting the string values into floats
                 self.b[i] = float(input_vals[i])
                 

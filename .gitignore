@@ -1,3 +1,6 @@
+# Hailey's ignored files
+*.fgl
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

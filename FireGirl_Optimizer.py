@@ -1,6 +1,6 @@
 from FireGirl_Landscape import *
 from FireGirl_Policy import *
-import math, scipy
+import math, scipy, pickle
 from scipy.optimize import *
 
 class FireGirlPolicyOptimizer:
@@ -18,7 +18,7 @@ class FireGirlPolicyOptimizer:
         #Boundaries for what the parameters can be set to during scipy's optimization routine:
         self.b_bounds = []
         if USING_FIREGIRL_LANDSCAPES == True:
-            for i in range(10):
+            for i in range(11):
                 self.b_bounds.append([-10,10])
 
         #Flag: Use log(probabilities)  -  If we want to force sums of log(probs), set to True
@@ -35,11 +35,11 @@ class FireGirlPolicyOptimizer:
         #  FireGirl_Policy or FireWoman_Policy
 
         if USING_FIREGIRL_LANDSCAPES == True:
-            #FireGirl uses 10 parameters, so set them all to 1 (coin-toss policy)
-            self.Policy = FireGirlPolicy(None,1,10)
+            #FireGirl uses 11 parameters, so set them all to 0 (coin-toss policy)
+            self.Policy = FireGirlPolicy(None,0,11)
         else:
-            #FireWoman uses ??? parametres, so set them all to 1 (coin-toss policy)
-            self.Policy = FireGirlPolicy(None,1,30)
+            #FireWoman uses ??? parametres, so set them all to 0 (coin-toss policy)
+            self.Policy = FireGirlPolicy(None,0,30)
 
 
         ##########################################################################################
@@ -221,7 +221,9 @@ class FireGirlPolicyOptimizer:
 
                     sum_delta_prob += delta_prob / prob
 
-                d_obj_d_bk[l] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob
+                
+                d_obj_d_bk[beta] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob
+
 
                 #going on to the next landscape
 
@@ -321,7 +323,7 @@ class FireGirlPolicyOptimizer:
         #Check if we need a new policy, or if one was passed in
         if policy == None:
             #no policy passed, so create a new one
-            self.Policy = FireGirlPolicy(None,0,10)
+            self.Policy = FireGirlPolicy(None,0,11)
         
         #Clear the landscape_set list in case there's old landscapes in it
         self.landscape_set = []
@@ -333,11 +335,13 @@ class FireGirlPolicyOptimizer:
         #Have each landscape create new data for itself. Right now their timber_values 
         #   and fuel_loads are set uniformally to zero
         for ls in self.landscape_set:
+            print("Creating landscape " + str(ls.ID_number))
             ls.generateNewLandscape()
             #Have each landscape simulate for the given number of years
             ls.doYears(years)
             
         #Finish up by calculating the final values of each landscape
+        print("Summing Landscape Values")
         self.sumLandscapeValues()
 
 
@@ -387,7 +391,7 @@ class FireGirlPolicyOptimizer:
 
             #Add Up logging totals, since they are not reported above
             net_val += self.landscape_set[ls].getHarvestTotal()
-            net_val -= self.landscape_set[ls].getSuppressionCost()
+            net_val -= self.landscape_set[ls].getSuppressionTotal()
 
 
             #before we go on to the next landscape, add this value to the net
@@ -403,15 +407,42 @@ class FireGirlPolicyOptimizer:
     ###################
     # Other Functions #
     ###################
+    def saveFireGirlLandscapes(self, filename):
+        output = open(filename, 'wb')
+
+        # Pickle dictionary using default protocol 0.
+        pickle.dump(self.landscape_set, output)
+
+        output.close()
+
     def loadFireGirlLandscapes(self, filename):
         #This function loads a saved set of FireGirl Landscapes
-        pass
+
+        pkl_file = open(filename, 'rb')
+
+        self.landscape_set = []
+        self.landscape_set = pickle.load(pkl_file)
+
+        pkl_file.close()
+
+        #and do the post-processing
+        #TODO: get this into the Landscape class...
+        self.sumLandscapeValues()
+
     def loadFireWomanLandscapes(self, filename):
         #This function loads a saved set of FireWoman Landscapes
 
         #REMINDER: this function needs to assign values to self.landscape_net_values
 
         pass
+
+    def setPolicy(self, policy):
+        #take the policy given and give it to every landscape in the current set.
+        self.Policy = policy
+        for ls in self.landscape_set:
+            ls.Policy = self.Policy
+
+
     def resetPolicy(self):
         #This function resets the policy to a 50/50 coin-toss
         pass
@@ -442,9 +473,9 @@ class DEPRECATED_FireGirl_Optimizer(FireGirlPolicyOptimizer):
       
         #Boundaries for what the parameters can be set to during scipy's optimization routine:
         self.b_bounds = []
-        #there are 10 parameters, and each has an upper and lower bound. They need
+        #there are 11 parameters, and each has an upper and lower bound. They need
         #   to be in a list of pairs. Right now, they're all being set identically.
-        for i in range(10):
+        for i in range(11):
             self.b_bounds.append([-10,10])
     
     def createNewDataSet(self, landscape_count, years_per_landscape, policy=None):
@@ -666,10 +697,10 @@ class DEPRECATED_FireGirl_Optimizer(FireGirlPolicyOptimizer):
         # checking for new beta parameters
         if not b == None:
             #sanitization check to make sure enough values are being passed in
-            if len(b) >= 10:
+            if len(b) >= 11:
                 self.Policy.b = b
             else:
-                print("Error in FireGirl_Optimizer.calcObjectiveFn(): Input arg 'b' contains < 10 elements. Ignoring the values given.")
+                print("Error in FireGirl_Optimizer.calcObjectiveFn(): Input arg 'b' contains < 11 elements. Ignoring the values given.")
         
         
         # First, calculate the final landscape values

@@ -39,8 +39,8 @@ class FireGirlLandscape:
         if policy_object == None:
             #No policy was given, so create a new one:
             if FIREGIRL_DATA == True:
-                #This is a FireGirl landscape, so make a new policy with 10 parameters
-                self.Policy = FireGirlPolicy(None,0,10)
+                #This is a FireGirl landscape, so make a new policy with 11 parameters
+                self.Policy = FireGirlPolicy(None,0,11)
             else:
                 #This is a FireWoman landscape, so make a new policy appropriately...
                 self.Policy = FireGirlPolicy(None,0,50) #TODO: HOW MANY FOR FIREWOMAN?
@@ -564,7 +564,7 @@ class FireGirlLandscape:
         #pol_val = self.Policy.evaluateSuppressionProbability()
 
         d2 = ignite_date * ignite_date
-        features = [ignite_date, d2, ignite_temp, ignite_wind, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24]
+        features = [1, ignite_date, d2, ignite_temp, ignite_wind, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24]
         #self.Policy.setFeatures(features) #Un-needed
         pol_val = self.Policy.calcProb(features)
         if pol_val == None:
@@ -975,8 +975,11 @@ class FireGirlLandscape:
         #   b) there are no more eligible stands
         total_cut = 0
 
+        tries = 0
+
         while True:
             if total_cut >= max_cut: break
+            if tries >= 10: break
 
             # Select a logging block such that the whole block will fit within the window
             #     of interest
@@ -987,6 +990,8 @@ class FireGirlLandscape:
             total_cut += self.doLogging_one_block( x, y, (max_cut - total_cut) )
             #print("while loop, total_cut = " + str(total_cut))
             #print("max cut = " + str(max_cut))
+
+            tries += 1
 
 
         # Report logging results
@@ -1046,10 +1051,10 @@ class FireGirlLandscape:
             self.Logbook.updateFuelAve24   (self.year, self.calcFuelAve24(x,y)   )
         
             #recording in the new ignition object type
-            features = [ignite_date, (ignite_date*ignite_date), ignite_temp, ignite_wind,
+            features = [1, ignite_date, (ignite_date*ignite_date), ignite_temp, ignite_wind,
                         self.timber_value[x][y], self.calcTimberAve8(x,y), self.calcTimberAve24(x,y),
                         self.fuel_load[x][y], self.calcFuelAve8(x,y), self.calcFuelAve24(x,y)]
-            f_labels = ["date", "date squared", "temperature", "wind speed", 
+            f_labels = ["CONSTANT", "date", "date squared", "temperature", "wind speed", 
                         "timber value", "timber value, ave8", "timber value, ave24", 
                         "fuel load", "fuel load, ave8", "fuel load, ave 24" ]
             firerecord_new.setFeatures(features)
