@@ -123,7 +123,7 @@ class FireGirlLandscape:
             
             # ignition probability: the likelihood of there being an important fire on
             #   any given year
-            self.ignition_prob = 0.9
+            self.ignition_prob = 1
             
             # temperature variables: These variables control the temperature average and
             #    mean, throughout the year. They are based on a cosine distribution (for
@@ -182,7 +182,7 @@ class FireGirlLandscape:
 
             #### SUPPRESSION MODEL
             # a list to hold each year's suppression costs
-            self.yearly_suppression_costs
+            self.yearly_suppression_costs = []
 
             #for the end-of-fire time, this is the average "days" it takes. This actually
             # effects the time that will be allowed to the fire spreading model before it cuts itself
@@ -440,7 +440,8 @@ class FireGirlLandscape:
         return (random.expovariate(1) * self.wind_mean)
     
     def drawEndOfFire(self):
-        return (random.expovariate(1 / self.fire_average_end_day))
+        day = random.expovariate(1) * self.fire_average_end_day
+        return day + 1  #give them at least one day...
 
     def generateNewLandscape(self):
         #This function will erase all current data in this landscape and 
@@ -454,7 +455,7 @@ class FireGirlLandscape:
         
         #function signature: 
         #def FireGirl_DS_alg      (seedValue,      min_val, max_val, roughness=0.5)
-        newgrids = FireGirl_DS_alg(self.ID_number,       0,     100,           0.5)
+        newgrids = FireGirl_DS_alg(self.ID_number,       0,     120,           0.5)
         
         #assign them to this object's members
         self.timber_value = newgrids[0]
@@ -855,7 +856,7 @@ class FireGirlLandscape:
         
 
         #and finally, return the loss data
-        return [timber_loss, cells_burned, sup_cost]
+        return [timber_loss, cells_burned, sup_cost, end_time]
                     
     def doGrowth(self):
         #This function applies the timber and fuel load growth models to all cells on the landscape,
@@ -888,11 +889,13 @@ class FireGirlLandscape:
                 age = math.exp(self.timber_value[i][j] / self.growth_timber_constant)
                 #and apply the timber value for the new age
                 old_val = self.timber_value[i][j]
-                new_val = self.growth_timber_constant * math.ln(age + 1)
+                new_val = self.growth_timber_constant * math.log(age + 1)
                 self.timber_value[i][j] = new_val
 
-                #and record this growth as part of the year's total growth
-                total_growth += (new_val - old_val)
+                #and record this growth as part of the year's total growth, but only for
+                #  the window of interest
+                if (i >= 43) and (i < 86) and (j >= 43) and (j < 86):
+                    total_growth += (new_val - old_val)
 
 
                 # 2) Apply fuel accumulation model:
@@ -914,12 +917,12 @@ class FireGirlLandscape:
         done_cutting = False
 
         #start loop at (x,y) and move over the block defined by self.logging_block_width, etc...
-        for i in range(x, self.logging_block_width):
+        for i in range(x, x + self.logging_block_width):
             
             #check for stop condition
             if done_cutting == True: break
 
-            for j in range(y, self.logging_block_width):
+            for j in range(y, y + self.logging_block_width):
 
                 #check for stop condition
                 if done_cutting == True: break
@@ -939,6 +942,9 @@ class FireGirlLandscape:
                         #we have, so break out of the for loops
                         done_cutting = True
 
+        #check for failure
+        #if done_cutting == False:
+        #    print("doLogging_one_block() failed to cut quota")
 
         #finished looping, so return the total amoutn cut
         return total_cut
@@ -979,6 +985,8 @@ class FireGirlLandscape:
 
             #cut a new block, allowing whatever remains of our current logging limit to be cut
             total_cut += self.doLogging_one_block( x, y, (max_cut - total_cut) )
+            #print("while loop, total_cut = " + str(total_cut))
+            #print("max cut = " + str(max_cut))
 
 
         # Report logging results
@@ -992,8 +1000,8 @@ class FireGirlLandscape:
         #   1) Draw a new ignition (if any)
         #   2) If there's an ignition, apply the current suppression rule
         #   3) If there's an ignition, do the fire model, including suppression (if any)
-        #   4) Do the logging model
-        #   5) Do the ecological model
+        #   4) Do the growth model
+        #   5) Do the logging model
         #
         #   in each step) In this landscape's Logbook, record:
         #       a) the year
@@ -1086,32 +1094,35 @@ class FireGirlLandscape:
             #there is an ignition, so:
             
             # Invoke the fire model and record it's return value, which is in the
-            # form:  [timber_loss, cells_burned, sup_cost]
+            # form:  [timber_loss, cells_burned, sup_cost, end_time]
             fireresults = self.doFire(ignite_date, ignite_loc, ignite_wind, ignite_temp, suppress_decision)
             timber_loss = fireresults[0]
             cells_burned = fireresults[1]
             sup_cost = fireresults[2]
+            end_time = round(fireresults[3], 3)
             
             #recording outcomes
             self.Logbook.updateTimberLoss(self.year, timber_loss)
             self.Logbook.updateCellsBurned(self.year, cells_burned)
 
             #recording outcomes in new object type
-            firerecord_new.setOutcomes([timber_loss, cells_burned, sup_cost])
-            firerecord_new.setOutcomeLabels(["timber loss", "cells burned", "suppression cost"])
+            firerecord_new.setOutcomes([timber_loss, cells_burned, sup_cost, end_time])
+            firerecord_new.setOutcomeLabels(["timber loss", "cells burned", "suppression cost", "burn time"])
         
-        
-        ##############################
-        ### STEP 4 - LOGGING MODEL ###
-        ##############################
-        
-        self.doLogging()
-        
+                
         #################################
-        ### STEP 5 - ECOLOGICAL MODEL ###
+        ### STEP 4 -   GROWTH MODEL   ###
         #################################
     
         self.doGrowth()
+
+
+        ##############################
+        ### STEP 5 - LOGGING MODEL ###
+        ##############################
+        
+        self.doLogging()
+
         
         ##########################
         ### Finalization Steps ###
