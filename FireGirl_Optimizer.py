@@ -340,7 +340,7 @@ class FireGirlPolicyOptimizer:
         #Have each landscape create new data for itself. Right now their timber_values 
         #   and fuel_loads are set uniformally to zero
         for ls in self.landscape_set:
-            
+
             #have each landscape create timber/fuel data for itself
             print("Creating landscape " + str(ls.ID_number))
             ls.generateNewLandscape()
@@ -442,8 +442,10 @@ class FireGirlPolicyOptimizer:
         pkl_file.close()
 
         #and do the post-processing
-        #TODO: get this into the Landscape class...
-        #self.sumLandscapeValues()
+        
+        #force each landscape to update their values
+        for ls in self.landscape_set:
+            ls.updateNetValue()
 
     def loadFireWomanLandscapes(self, filename):
         #This function loads a saved set of FireWoman Landscapes

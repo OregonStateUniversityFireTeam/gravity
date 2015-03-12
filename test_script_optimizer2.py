@@ -14,8 +14,8 @@ print("fprme: " + str(FGPO.calcObjFPrime()))
 print("weights: " + str(FGPO.landscape_weights))
 print("net values: " + str(FGPO.landscape_net_values))
 
-#setting new policy on temp and windspeed
-b = [0,0,0,10,10,0,0,0,0,0,0]
+#setting new policy
+b = [10,10,10,10,10,10,10,10,10,10,10]
 pol = FireGirlPolicy(b)
 FGPO.setPolicy(pol)
 print(" ")

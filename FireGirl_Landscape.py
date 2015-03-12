@@ -567,6 +567,7 @@ class FireGirlLandscape:
         features = [1, ignite_date, d2, ignite_temp, ignite_wind, timber_val, timber_ave8, timber_ave24, fuel, fuel_ave8, fuel_ave24]
         #self.Policy.setFeatures(features) #Un-needed
         pol_val = self.Policy.calcProb(features)
+
         if pol_val == None:
             print("Error: Invalid type for policy probability: type = None")
 
@@ -660,7 +661,7 @@ class FireGirlLandscape:
 
         #the value is already assigned to the local variable, but also return it:
         return self.net_value
-        
+
 
     def doFire(self, ignite_date, ignite_loc, ignite_wind, ignite_temp, suppress):
         #This function is the fire model. Given the input arguments, it will
