@@ -2,8 +2,8 @@ from FireGirl_Optimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
 ###To create, uncomment the following two lines:
-#FGPO.createFireGirlLandscapes(20,50)
-#FGPO.saveFireGirlLandscapes("FG_landscapes_20x50.fgl")
+FGPO.createFireGirlLandscapes(20,50)
+FGPO.saveFireGirlLandscapes("FG_landscapes_20x50.fgl")
 
 ###To load (already created data), uncomment the following line
 FGPO.loadFireGirlLandscapes("FG_landscapes_20x50.fgl")

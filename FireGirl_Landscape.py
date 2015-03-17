@@ -1031,6 +1031,7 @@ class FireGirlLandscape:
         #For recording in the new ignition object type
         firerecord_new = FireGirlIgnitionRecord()
         firerecord_new.year = self.year
+        firerecord_new.location = [x,y]
 
         ignite_wind = 0
         ignite_temp = 0
