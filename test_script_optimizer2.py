@@ -26,6 +26,6 @@ print("weights: " + str(FGPO.landscape_weights))
 print("net values: " + str(FGPO.landscape_net_values))
 
 ###To Optimize, uncomment the following
-#print("Beginning Optimization Routine")
-#new_pol_params=FGPO.optimizePolicy()
-#print(new_pol_params)
+print("Beginning Optimization Routine")
+new_pol_params=FGPO.optimizePolicy()
+print(new_pol_params)

@@ -283,6 +283,7 @@ class FireGirlLandscape:
         #   USE_LOG_PROB flag is set, it will sum the logged probabilities
         #   instead.
 
+
         total_prob = 0
 
         if self.USE_LOG_PROB == False:
@@ -294,7 +295,9 @@ class FireGirlLandscape:
             for ign in self.ignitions:
 
                 try:
-                    product *= ign.getProb()
+                    #use the current policy to calculate a new probability with the original features
+                    #   of each ignition
+                    product *= self.Policy.calcProb(ign.getFeatures())
                 except (TypeError):
                     print("FGLandscape.calcTotalProb() encountered a TypeError:")
                     print(" ignition.getProb() returns: " + str(ign.getProb()))
@@ -325,7 +328,9 @@ class FireGirlLandscape:
             summation = 0
 
             for ign in self.ignitions:
-                summation += math.ln(ign.getProb())
+                #use the current policy to calculate a new probability with the original features
+                #   of each ignition
+                summation += math.ln(self.Policy.calcProb(ign.getFeatures()))
 
             try:
                 total_prob = math.exp(summation)

@@ -3,11 +3,10 @@ from FireGirl_Policy import *
 
 
 FGPO = FireGirlPolicyOptimizer()
-
-FGPO.createFireGirlLandscapes(4,10) #four landscapes, ten years each
+pol0 = FireGirlPolicy(params=None, SETALL=-50, COUNT=11)
+FGPO.createFireGirlLandscapes(4,10,pol0) #four landscapes, ten years each, policy
 
 #testing landscape.assignPolicy(params=None, SETALL=x, COUNT=y)
-pol0 = FireGirlPolicy(params=None, SETALL=-50, COUNT=11)
 pol1 = FireGirlPolicy(params=None, SETALL=0, COUNT=11)
 pol2 = FireGirlPolicy(params=None, SETALL=1, COUNT=11)
 pol3 = FireGirlPolicy(params=None, SETALL=50, COUNT=11)
@@ -54,7 +53,42 @@ print(FGPO.landscape_set[3].Policy.b)
 #testing landscape.calcTotalProb()
 print(" ")
 print(" ")
-print("Testing landscape.calcTotalProb()")
+print("Testing landscape.calcTotalProb() with suppress policy")
+FGPO.Policy = pol7
+print("ls0   "),
+print(FGPO.landscape_set[0].calcTotalProb())
+print("ls1   "),
+print(FGPO.landscape_set[1].calcTotalProb())
+print("ls2   "),
+print(FGPO.landscape_set[2].calcTotalProb())
+print("ls3   "),
+print(FGPO.landscape_set[3].calcTotalProb())
+print("  and the resulting landscape_weights are:")
+FGPO.calcLandscapeWeights()
+print(FGPO.landscape_weights)
+
+#testing landscape.calcTotalProb()
+print(" ")
+print(" ")
+print("Testing landscape.calcTotalProb() with let-burn policy")
+FGPO.Policy = pol0
+print("ls0   "),
+print(FGPO.landscape_set[0].calcTotalProb())
+print("ls1   "),
+print(FGPO.landscape_set[1].calcTotalProb())
+print("ls2   "),
+print(FGPO.landscape_set[2].calcTotalProb())
+print("ls3   "),
+print(FGPO.landscape_set[3].calcTotalProb())
+print("  and the resulting landscape_weights are:")
+FGPO.calcLandscapeWeights()
+print(FGPO.landscape_weights)
+
+#testing landscape.calcTotalProb()
+print(" ")
+print(" ")
+print("Testing landscape.calcTotalProb() with coin-toss policy")
+FGPO.Policy = pol1
 print("ls0   "),
 print(FGPO.landscape_set[0].calcTotalProb())
 print("ls1   "),
@@ -69,28 +103,30 @@ print(FGPO.landscape_weights)
 
 
 #testing ignition.getProb for each ignition in each landscape
-print(" ")
-print(" ")
-print("Printing ignition.getProb() values for each ignition in each landscape")
-for i in range(10):
-	if i == 0:
-		print("ls0    ls1    ls2    ls3")
-	for l in range(4):
-		print("{0:3.3f} ".format(FGPO.landscape_set[l].ignitions[i].getProb())),
-	print(" ") #for an endline
+if False:
+	print(" ")
+	print(" ")
+	print("Printing ignition.getProb() values for each ignition in each landscape")
+	for i in range(10):
+		if i == 0:
+			print("ls0    ls1    ls2    ls3")
+		for l in range(4):
+			print("{0:3.3f} ".format(FGPO.landscape_set[l].ignitions[i].getProb())),
+		print(" ") #for an endline
 	
 #the getProb() function returns values which were set in landscape.DoYear() step 2 
 #   it uses the landscape.evaluateSuppressionRule(ignite_date, ignite_loc, ignite_wind, ignite_temp) command
 
 #Printing the fire features for each landscape's ignitions
-print(" ")
-for ls in FGPO.landscape_set:
-	print("Landscape " + str(ls.ID_number) + " ignition features")
-	for i in range(10):
-		ftrs = ls.ignitions[i].getFeatures()
-		for f in range(11):
-			print(round(ftrs[f],3)),
-		print(" ") #for a line break
+if False:
+	print(" ")
+	for ls in FGPO.landscape_set:
+		print("Landscape " + str(ls.ID_number) + " ignition features")
+		for i in range(10):
+			ftrs = ls.ignitions[i].getFeatures()
+			for f in range(11):
+				print(round(ftrs[f],3)),
+			print(" ") #for a line break
 		
 		
 #Testing evaluateSuppressionRule(self, ignite_date, ignite_loc, ignite_wind, ignite_temp)
@@ -107,14 +143,37 @@ for ls in FGPO.landscape_set:
 
 
 #Testing landscape.Policy.calcProb(features) and .crossProduct()
+if False:
+	print(" ")
+	print(" ")
+	print("Testing landscape.Policy.calcProb(features) return values:")
+	for ls in FGPO.landscape_set:
+		print("Landscape " + str(ls.ID_number) + " .Policy.calcProb(features) returns: ")
+		print("Policy b[]: " + str(ls.Policy.b))
+		for i in range(10):
+			#needed ign feature indices are 1, location, 3, 4
+			f = ls.ignitions[i].getFeatures()
+			print("Cross Product: " + str(ls.Policy.crossProduct(f)))
+			print("calcProb: " + str(ls.Policy.calcProb(f)))
+
+
+
+#Testing calcObjFn() with different policies
 print(" ")
 print(" ")
-print("Testing landscape.Policy.calcProb(features) return values:")
-for ls in FGPO.landscape_set:
-	print("Landscape " + str(ls.ID_number) + " .Policy.calcProb(features) returns: ")
-	print("Policy b[]: " + str(ls.Policy.b))
-	for i in range(10):
-		#needed ign feature indices are 1, location, 3, 4
-		f = ls.ignitions[i].getFeatures()
-		print("Cross Product: " + str(ls.Policy.crossProduct(f)))
-		print("calcProb: " + str(ls.Policy.calcProb(f)))
+print("Testing calcObjFn() and calcObjFPrime() with a let-burn policy")
+FGPO.Policy = pol0
+print("calcObjFn() returns: " + str(FGPO.calcObjFn()))
+print("calcObjFPrime() returns: " + str(FGPO.calcObjFPrime()))
+
+print(" ")
+print("Testing calcObjFn() and calcObjFPrime() with a coin-toss policy")
+FGPO.Policy = pol1
+print("calcObjFn() returns: " + str(FGPO.calcObjFn()))
+print("calcObjFPrime() returns: " + str(FGPO.calcObjFPrime()))
+
+print(" ")
+print("Testing calcObjFn() and calcObjFPrime() with a suppress-all policy")
+FGPO.Policy = pol7
+print("calcObjFn() returns: " + str(FGPO.calcObjFn()))
+print("calcObjFPrime() returns: " + str(FGPO.calcObjFPrime()))

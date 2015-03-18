@@ -79,6 +79,14 @@ class FireGirlIgnitionRecord:
     def setBurnTime(self, time):
         self.burn_time = time
 
+    def calcNewProb(self, policy_object):
+        #this function will use the record's CURRENT set of features and ask the
+        #  policy it is given as an arguement what the new suppression probability will be.
+        #  It does NOT assign that probability, at the moment.
+
+        prob = policy_object.calcProb(self.features)
+
+        return prob
 
 
 class FireGirl_Landscape_Logbook:

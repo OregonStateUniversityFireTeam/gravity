@@ -57,7 +57,7 @@ class FireGirlPolicyOptimizer:
     # Optimization Functions #
     ##########################
 
-    def calcLandscapeWeights(self):
+    def calcLandscapeWeights(self, USE_SELF_POLICY=True):
         #This function looks through each fire of a given landscape and applies the current
         #  policy to the features of each one. The resulting 'probability' from the policy 
         #  function is either multiplied or 'log-summed' be the others to produce the final 
@@ -75,7 +75,13 @@ class FireGirlPolicyOptimizer:
             ls.USE_LOG_PROB = self.USE_LOG_PROB
         
             #setting this landscape's policy to the current one
-            ls.assignPolicy(self.Policy)
+            if USE_SELF_POLICY == True:
+                ls.assignPolicy(self.Policy)
+            else:
+                #setting this to false indicates that the landscapes have their own policies
+                # (possibly applied elsewhere) and that they should use them, instead of
+                # taking the optimizer's current policy. Mostly used for testing
+                pass
                 
             p = ls.calcTotalProb()
 
@@ -323,12 +329,14 @@ class FireGirlPolicyOptimizer:
     def createFireGirlLandscapes(self, landscape_count, years, policy=None):
         #This function creates a new set of FireGirl-style landscapes (deleting all current
         #    landscape data)
-
-       
+        
         #Check if we need a new policy, or if one was passed in
         if policy == None:
             #no policy passed, so create a new one
             self.Policy = FireGirlPolicy(None,0,11)
+        else:
+            #one was passed, so set it.
+            self.Policy = policy
         
         #Clear the landscape_set list in case there's old landscapes in it
         self.landscape_set = []
@@ -355,69 +363,6 @@ class FireGirlPolicyOptimizer:
         #Finish up by calculating the final values of each landscape
         #print("Summing Landscape Values")
         #self.sumLandscapeValues()
-
-
-    def DEPRECATINGsumLandscapeValues(self):
-        #THIS FUNCTION IS NOW HANDLED WITHIN THE LANDSCAPE OBJECTS THEMSELVES, VIA
-        # THE landscape.updateNetValue() MEHTOD.
-
-
-        #This function is unique to the FireGirl model, which does not calculate
-        # it's own interal net-present-value like FireWoman does. It is really just
-        # a sub-function of the calcObjectiveFn() function.
-        
-        #This function looks through each landscape in the dataset and sums its
-        #  total net value, and then records them in the self.landscape_net_values list
-        
-        #loop-variable to hold one landscape's net value
-        net_val = 0
-        
-        #erasing previous net-values
-        self.landscape_net_values = []
-        
-        #looping through each landscape
-        for ls in range(len(self.landscape_set)):
-            
-            #adding new element to landscape_net_values for this index
-            self.landscape_net_values.append(0)
-            
-            #reseting net_val
-            net_val = 0
-            
-            #looping through each of this landscape's logbook entries
-            for entry in self.landscape_set[ls].Logbook.log_list:
-                
-                if not entry.timber_loss == None:
-                    #subtracting timber losses from crown fires
-                    net_val -= entry.timber_loss
-                
-                #these are never reported...
-                if not entry.logging_total == None:
-                    #adding values from logging
-                    net_val += entry.logging_total
-                    
-            #finished looping over this landscape's logbook entries    
-                
-            #now, if desired, adding up any remaining land value
-            if self.count_standing_timber == True:
-                for i in range(43,86):
-                    for j in range(43,86):
-                        net_val += self.landscape_set[ls].timber_value[i][j]
-
-
-            #Add Up logging totals, since they are not reported above
-            net_val += self.landscape_set[ls].getHarvestTotal()
-            net_val -= self.landscape_set[ls].getSuppressionTotal()
-
-
-            #before we go on to the next landscape, add this value to the net
-            #  value list at the same index as the landscape is in the landscape_set list
-            #  
-            #note: doing the +1 -1 thing to ensure that a value, rather than a reference, is passed
-            self.landscape_net_values[ls] = ( net_val + 1 - 1 )
-        
-        #all landscapes have had their net values recorded
-
 
 
     ###################
@@ -458,7 +403,7 @@ class FireGirlPolicyOptimizer:
         #take the policy given and give it to every landscape in the current set.
         self.Policy = policy
         for ls in self.landscape_set:
-            ls.Policy = self.Policy
+            ls.assignPolicy(self.Policy)
 
 
     def resetPolicy(self):
