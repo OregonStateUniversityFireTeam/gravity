@@ -29,6 +29,7 @@ class FireGirlIgnitionRecord:
         self.outcome_labels = []
         self.year = 0
         self.burn_time = 0
+        self.location = []
 
     def getYear(self):
         return self.year
