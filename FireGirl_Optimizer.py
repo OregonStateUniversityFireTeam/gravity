@@ -83,8 +83,10 @@ class FireGirlPolicyOptimizer:
                 # taking the optimizer's current policy. Mostly used for testing
                 pass
             
+            #ls.DEBUG = True
             p = ls.calcTotalProb()
-
+            #ls.DEBUG = False
+            
             self.landscape_weights.append(p)
 
     def calcObjFn(self, b=None):
@@ -269,7 +271,7 @@ class FireGirlPolicyOptimizer:
         
         #record the first 'optimization value' which is really just a placeholder 
         #  to keep indices even
-        obj_vals.append(-9999999)
+        obj_vals.append(-999)
         #record the first parameter set
         param_sets.append(self.Policy.b)
         
@@ -279,16 +281,16 @@ class FireGirlPolicyOptimizer:
             
             #running the scipy gradient descent method
             #signature is:
-        	#scipy.optimize.fmin_l_bfgs_b(func, x0, fprime=None, args=(), approx_grad=0, bounds=None, m=10, 
+            #scipy.optimize.fmin_l_bfgs_b(func, x0, fprime=None, args=(), approx_grad=0, bounds=None, m=10, 
             #                             factr=10000000.0, pgtol=1e-05, epsilon=1e-08, iprint=-1, maxfun=15000,
             #                             maxiter=15000, disp=None, callback=None)
-        	# func is a function name, at is referenceing the objective function that it will use
-        	# x0 is the starting parameters that fmin_l_bfgs_b() will use
-        	# fprime="None" is telling fmin...() that we are not passing in a function to calculate derivitave values
-        	# args=() is asking for any input arguments needed for the objective function, other than the beta parameters
-        	# approx_grad is telling fmin...() to approximate it's own derivatives, or to use some other gradient
-        	# bounds should be a list of upper and lower bound pairs. See scipy.optimize.fmin_l_bfgs_b documentation.
-        	# The rest of the arguments are left as defaults.
+            # func is a function name, at is referenceing the objective function that it will use
+            # x0 is the starting parameters that fmin_l_bfgs_b() will use
+            # fprime="None" is telling fmin...() that we are not passing in a function to calculate derivitave values
+            # args=() is asking for any input arguments needed for the objective function, other than the beta parameters
+            # approx_grad is telling fmin...() to approximate it's own derivatives, or to use some other gradient
+            # bounds should be a list of upper and lower bound pairs. See scipy.optimize.fmin_l_bfgs_b documentation.
+            # The rest of the arguments are left as defaults.
             
             #converting to numpy arrays
             x0 = scipy.array(self.Policy.b)

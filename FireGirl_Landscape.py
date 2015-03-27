@@ -31,6 +31,9 @@ class FireGirlLandscape:
         #assigning the ID number (required!)
         self.ID_number = ID_number
         
+        #for testing only, a flag for Debug outputs
+        self.DEBUG = False
+        
         #The policy object is defined in FireGirl_Policy.py, and contains everything
         #  required to evaluate a set of features against a given policy. To the
         #  landscape object, this operates as a black box.
@@ -291,12 +294,32 @@ class FireGirlLandscape:
 
             product = 1.0
             break_loop = False
+            
+            if self.DEBUG == True:
+                print("In ls.calcTotalProb()...  Landscape " + str(self.ID_number))
+                
             for ign in self.ignitions:
+                if self.DEBUG == True:
+                    print("  ign " + str(self.ignitions.index(ign)))
 
                 try:
                     #use the current policy to calculate a new probability with the original features
                     #   of each ignition
-                    product *= self.Policy.calcProb(ign.getFeatures())
+                    p = self.Policy.calcProb(ign.getFeatures())
+                      
+                    p_actual = 0.0
+                    if ign.getChoice() == True:
+                        #this fire was suppressed, so use the probability as is
+                        p_actual = p
+                    else:
+                        #this fire was allowed to burn, so use the other probability
+                        p_actual = 1.0 - p
+                        
+                    if self.DEBUG == True:
+                        print("calculated: " + str(p) + "  actual: " + str(p_actual))
+                        
+                    product *= p_actual
+                    
                 except (TypeError):
                     print("FGLandscape.calcTotalProb() encountered a TypeError:")
                     print(" ignition.getProb() returns: " + str(ign.getProb()))
@@ -309,7 +332,7 @@ class FireGirlLandscape:
 
                     #since the value underflowed, it is clearly VERY small, so just
                     # set it to zero
-                    product = 0
+                    product = 0.0
 
                     #and report it
                     print("a FireGirlLandscape object reports an underflow condition during a PRODUCT calculation")
@@ -324,12 +347,21 @@ class FireGirlLandscape:
         else:
             #according to the flag, we ARE using sum(log(probs)) so do so:
             
-            summation = 0
+            summation = 0.0
 
             for ign in self.ignitions:
                 #use the current policy to calculate a new probability with the original features
                 #   of each ignition
-                summation += math.ln(self.Policy.calcProb(ign.getFeatures()))
+                p = self.Policy.calcProb(ign.getFeatures())
+                p_actual = 0.0
+                if ign.getChoice() == True:
+                    #this fire was suppressed, so use the probability as is
+                    p_actual = p
+                else:
+                    #this fire was allowed to burn, so use the other probability
+                    p_actual = 1.0 - p
+                    
+                summation += math.ln(p_actual)
 
             try:
                 total_prob = math.exp(summation)
@@ -339,7 +371,7 @@ class FireGirlLandscape:
 
                 #If it underflows, the probability total is very small, so just set
                 #  it to zero
-                total_prob = 0
+                total_prob = 0.0
 
                 #and report it
                 print("a FireGirlLandscape object reports an underflow condition during a SUMMATION calculation")

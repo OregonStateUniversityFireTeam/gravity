@@ -28,7 +28,15 @@ class FireGirlPolicy:
                 if not SETALL == None:
                     for i in range(COUNT):
                         self.b.append(float(SETALL))
-
+        
+        #Because the logistic function can easily produce 0-values for very low probabilities, 
+        #  we need to set a limit for what the lowest probability allowed is. Otherwise
+        #  the product of any series of events is likely to be 0, because of even one very low probability
+        self.probability_lower_limit = 0.01
+        
+        #likewise, since a choice that DOES NOT follow a rule when the probability is 1 will also produce 
+        #  and effective probability of 0, there needs to be an upper limit as well.
+        self.probability_upper_limit = 0.99
 
     def setParams(self, parameter_list):
         self.b = []
@@ -75,11 +83,21 @@ class FireGirlPolicy:
         self.features = feature_list
         cp = self.crossProduct()
         try:
-            return self.logistic(cp)
+            p = self.logistic(cp)
+            
+            #enforce lower limit on probabilities...
+            if p < self.probability_lower_limit:
+                p = self.probability_lower_limit
+                
+            #enforce upper limit on probabilities...
+            if p > self.probability_upper_limit:
+                p = self.probability_upper_limit
+                
+            return p
         except(OverflowError):
             print("FGPolicy.calcProb() encountered and overflow error:")
             print("  crossproduct is: " + str(cp))
-            return 0
+            return 0.0
 
 
    
