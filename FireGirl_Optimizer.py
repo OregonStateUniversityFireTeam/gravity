@@ -271,7 +271,7 @@ class FireGirlPolicyOptimizer:
         
         #record the first 'optimization value' which is really just a placeholder 
         #  to keep indices even
-        obj_vals.append(-999)
+        obj_vals.append(self.calcObjFn())
         #record the first parameter set
         param_sets.append(self.Policy.b)
         

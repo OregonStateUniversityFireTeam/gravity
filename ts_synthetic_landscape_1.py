@@ -93,6 +93,21 @@ print("weights : " + str(opt.landscape_weights))
 print(" ")
 print(" ")
 print("Trying new calculations with my best policy")
+opt.Policy.b = [0,1,-1,0,0,0,0,0,0,0,0]
+objfn2 = opt.calcObjFn()
+fprm2 = opt.calcObjFPrime()
+
+#Printing initial values
+print("Obj Fn: " + str(objfn2))
+print("Fprime: " + str(fprm2))
+print("net values: " + str(opt.landscape_net_values))
+print("weights : " + str(opt.landscape_weights))
+
+
+#Trying it with my known, best policy
+print(" ")
+print(" ")
+print("Trying new calculations with a bad policy")
 opt.Policy.b = [0,-1,1,0,0,0,0,0,0,0,0]
 objfn2 = opt.calcObjFn()
 fprm2 = opt.calcObjFPrime()
@@ -104,14 +119,13 @@ print("net values: " + str(opt.landscape_net_values))
 print("weights : " + str(opt.landscape_weights))
 
 
-
 #Optimizing
 if True:
 
     print(" ")
     print(" ")
     print("Optimizing Policy, beginning with a coin-toss policy ")
-    opt.Policy.b = [0,0.1,0.1,0,0,0,0,0,0,0,0]
-    output = opt.optimizePolicy()
+    opt.Policy.b = [0,0,0,0,0,0,0,0,0,0,0]
+    output = opt.optimizePolicy(2)
     print("Outputs")
     print(str(output))
