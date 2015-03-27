@@ -283,14 +283,13 @@ class FireGirlLandscape:
         #   USE_LOG_PROB flag is set, it will sum the logged probabilities
         #   instead.
 
-
         total_prob = 0
 
         if self.USE_LOG_PROB == False:
             #according to the flag, we're not using sum(log(probs)) so just
             #  compute the product
 
-            product = 1
+            product = 1.0
             break_loop = False
             for ign in self.ignitions:
 

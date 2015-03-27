@@ -27,14 +27,18 @@ class FireGirlPolicy:
             if not COUNT == None:
                 if not SETALL == None:
                     for i in range(COUNT):
-                        self.b.append(SETALL)
+                        self.b.append(float(SETALL))
 
 
     def setParams(self, parameter_list):
-        self.b = parameter_list
+        self.b = []
+        for param in parameter_list:
+            self.b.append(float(param))
 
     def setFeatures(self, feature_list):
-        self.features = feature_list
+        self.features = []
+        for feature in feature_list:
+            self.features.append(float(feature))
 
     def getParams(self):
         return self.b
@@ -48,7 +52,7 @@ class FireGirlPolicy:
         if not feature_list == None:
             self.features = feature_list
         
-        cp = 0
+        cp = 0.0
 
         for i in range(len(self.features)):
             cp += self.features[i] * self.b[i]
@@ -58,14 +62,14 @@ class FireGirlPolicy:
     def logistic(self, value):
         #This function calculates the simple logistic function value of the input
         try:
-            return (  1 / (1 + math.exp(-value))  )
+            return (  1.0 / (1.0 + math.exp(-value))  )
         except(OverflowError):
             #print("FireGirlPolicy.logistic() encountered and overflow error: returning 0")
 
             #an overflow error can only happen when value is very negative, resulting in too
             #  high a exp() value. In turn, this means the division goes to zero, as expected
             #  for a logistic function.
-            return 0
+            return 0.0
     
     def calcProb(self, feature_list):
         self.features = feature_list
@@ -78,11 +82,6 @@ class FireGirlPolicy:
             return 0
 
 
-    ## DEPRECATING ##
-    def evaluateSuppressionProbability(self):
-        cp = self.crossProduct()
-        return self.logistic(cp)     
-        
    
 class FireGirlPolicy_DEPRECATING(FireGirlPolicy):
     #This class contains all the code that actually interacts with the policy

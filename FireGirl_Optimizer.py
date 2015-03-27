@@ -82,7 +82,7 @@ class FireGirlPolicyOptimizer:
                 # (possibly applied elsewhere) and that they should use them, instead of
                 # taking the optimizer's current policy. Mostly used for testing
                 pass
-                
+            
             p = ls.calcTotalProb()
 
             self.landscape_weights.append(p)
@@ -405,10 +405,10 @@ class FireGirlPolicyOptimizer:
         for ls in self.landscape_set:
             ls.assignPolicy(self.Policy)
 
-
     def resetPolicy(self):
         #This function resets the policy to a 50/50 coin-toss
         pass
+
     def loadPolicy(self, filename):
         #This function loads a saved policy and assigns it to this optimization object
         pass
