@@ -11,7 +11,7 @@ for l in range(100):
 
 #create ignitions
 for ls in landscapes:
-    for i in range(100):
+    for i in range(15):
         ign = FireGirlIgnitionRecord()
         f1 = random.randint(-100,100)
         f2 = random.randint(-100,100)
@@ -19,7 +19,7 @@ for ls in landscapes:
         f4 = random.randint(-100,100)
         ign.features = [1,f1,f2,f3,f4,0,0,0,0,0,0]
         
-        danger = (1.0)*f1 + (0.5)*f2 - (0.5)*f3 - (1.0)*f4
+        danger = (1.5)*f1 + (0.5)*f2 - (0.5)*f3 - (1.0)*f4
         
         choice = bool(random.randint(0,1))
         ign.policy_choice = choice
@@ -57,28 +57,64 @@ fprm1 = opt.calcObjFPrime()
 print("Initial Values")
 print("Obj Fn: " + str(objfn1))
 print("Fprime: " + str(fprm1))
-#print("net values: " + str(opt.landscape_net_values))
-#print("weights : " + str(opt.landscape_weights))
 
-#Optimizing
+
+#optimize on just paramter 1
+#setting bounds
+bounds_p1_only = [[0,0],[-10,10],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+opt.b_bounds = bounds_p1_only
 if True:
-
     print(" ")
     print(" ")
-    print("Optimizing Policy, beginning with a coin-toss policy ")
+    print("Optimizing Policy on paramter 1 only, beginning with a coin-toss policy ")
     opt.Policy.b = [0,0,0,0,0,0,0,0,0,0,0]
     output = opt.optimizePolicy(1)
     print("Outputs")
     opt.printOptOutput(output)
-    
-if False:
-
+#optimize on all else
+#setting bounds
+p1_b = output[0][1][1]
+new_pol = output[0][1]
+bounds_all_but_p1 = [[-10,10],[p1_b,p1_b],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10]]
+opt.b_bounds = bounds_all_but_p1
+if True:
     print(" ")
     print(" ")
-    print("Optimizing Policy, beginning with a nudged policy ")
-    opt.Policy.b = [0,0.2,0.2,-0.2,-0.2,0,0,0,0,0,0]
+    print("Optimizing Policy on all but parameter 1")
+    opt.Policy.b = new_pol
+    opt.setPolicy(opt.Policy)
     output = opt.optimizePolicy(1)
     print("Outputs")
     opt.printOptOutput(output)
-    #print("raw outputs")
-    #print(str(output))
+#optimize on param 1 again
+#setting bounds
+p0_b = output[0][1][0]
+p2_b = output[0][1][2]
+p3_b = output[0][1][3]
+p4_b = output[0][1][4]
+new_pol = output[0][1]
+bounds_p1_only = [[p0_b,p0_b],[-10,10],[p2_b,p2_b],[p3_b,p3_b],[p4_b,p4_b],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+opt.b_bounds = bounds_p1_only
+if True:
+    print(" ")
+    print(" ")
+    print("Optimizing Policy on just param 1 again")
+    opt.Policy.b = new_pol
+    opt.setPolicy(opt.Policy)
+    output = opt.optimizePolicy(1)
+    print("Outputs")
+    opt.printOptOutput(output)
+
+    
+#and now, try it all from the very beginning, with no enforcement
+if True:
+    print(" ")
+    print(" ")
+    print("Optimizing Policy clean, from a new coin-toss policy")
+    opt.Policy.b = [0,0,0,0,0,0,0,0,0,0,0]
+    opt.b_bounds = [[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10]]
+    opt.setPolicy(opt.Policy)
+    output = opt.optimizePolicy(1)
+    print("Outputs")
+    opt.printOptOutput(output)
+

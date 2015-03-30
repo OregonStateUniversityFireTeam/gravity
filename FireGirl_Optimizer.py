@@ -84,8 +84,11 @@ class FireGirlPolicyOptimizer:
                 pass
             
             #ls.DEBUG = True
-            p = ls.calcTotalProb()
+            #p = ls.calcTotalProb()
             #ls.DEBUG = False
+            
+            #TESTING - USING Average Probability instead of total probability
+            p = ls.calcAveProb()
             
             self.landscape_weights.append(p)
 
@@ -336,7 +339,7 @@ class FireGirlPolicyOptimizer:
             print(str(round(obj_vals[v],2)) + "     "),
             
             for p in range(len(params[v])):
-                print("  " + str(round(params[v][p],2))),
+                print(" " + str(round(params[v][p],3))),
             
             print("") #to end the line
                 
