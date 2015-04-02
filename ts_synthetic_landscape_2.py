@@ -11,7 +11,7 @@ for l in range(100):
 
 #create ignitions
 for ls in landscapes:
-    for i in range(100):
+    for i in range(15):
         ign = FireGirlIgnitionRecord()
         f1 = random.randint(-100,100)
         f2 = random.randint(-100,100)

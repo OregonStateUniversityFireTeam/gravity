@@ -150,7 +150,7 @@ class FireGirlPolicyOptimizer:
         
         return obj_fn_val
 
-    def calcObjFPrime_OLD(self, betas=None):
+    def calcObjFPrime(self, betas=None):
         #This function returns the gradient of the objective function
 
         #The scipy documentation describes the fprime arguement as:
@@ -259,7 +259,7 @@ class FireGirlPolicyOptimizer:
         return scipy.array(d_obj_d_bk)
 
         
-    def calcObjFPrime(self, USE_AVE_PROB=False, betas=None):
+    def calcObjFPrime_NEW(self, betas=None, USE_AVE_PROB=True):
         #This function returns the gradient of an alternative obj fn which uses the average probability
         #  of each path rather than the total probability. 
 
