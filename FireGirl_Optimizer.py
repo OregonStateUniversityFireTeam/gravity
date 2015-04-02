@@ -57,7 +57,7 @@ class FireGirlPolicyOptimizer:
     # Optimization Functions #
     ##########################
 
-    def calcLandscapeWeights(self, USE_SELF_POLICY=True):
+    def calcLandscapeWeights(self, USE_AVE_PROB=False, USE_SELF_POLICY=True):
         #This function looks through each fire of a given landscape and applies the current
         #  policy to the features of each one. The resulting 'probability' from the policy 
         #  function is either multiplied or 'log-summed' be the others to produce the final 
@@ -84,11 +84,13 @@ class FireGirlPolicyOptimizer:
                 pass
             
             #ls.DEBUG = True
-            #p = ls.calcTotalProb()
+            p = 0.0
+            if USE_AVE_PROB == False:
+                p = ls.calcTotalProb()
             #ls.DEBUG = False
-            
-            #TESTING - USING Average Probability instead of total probability
-            p = ls.calcAveProb()
+            else:
+                #TESTING - USING Average Probability instead of total probability
+                p = ls.calcAveProb()
             
             self.landscape_weights.append(p)
 
@@ -148,7 +150,7 @@ class FireGirlPolicyOptimizer:
         
         return obj_fn_val
 
-    def calcObjFPrime(self, betas=None):
+    def calcObjFPrime_OLD(self, betas=None):
         #This function returns the gradient of the objective function
 
         #The scipy documentation describes the fprime arguement as:
@@ -256,6 +258,119 @@ class FireGirlPolicyOptimizer:
         # And Finally, return the list
         return scipy.array(d_obj_d_bk)
 
+        
+    def calcObjFPrime(self, USE_AVE_PROB=False, betas=None):
+        #This function returns the gradient of an alternative obj fn which uses the average probability
+        #  of each path rather than the total probability. 
+
+        #The scipy documentation describes the fprime arguement as:
+        #fprime : callable fprime(x,*args)
+        #The gradient of func. If None, then func returns the function value and the 
+        #  gradient (f, g = func(x, *args)), unless approx_grad is True in which case func returns only f.
+
+        #The return value should probably just be a list of the derivitive values with respect to each 
+        #   b-parameter in the policy
+
+
+        #Assign values to b. I don't think this function will ever be called
+        #  outside of the l_bfgs function, but if so, handle it:
+        b = None
+        if betas == None:
+            b = self.Policy.getParams()
+        else:
+            b = betas
+
+        # list to hold the final values, one per parameter
+        d_obj_d_bk = []
+        for i in range(len(b)):
+            d_obj_d_bk.append(0)
+
+        #get the total probability for each landscape decision sequence using the 
+        #   current policy (which is possibly being varied by l_bfgs, etc...)
+        #  USE_AVE_PROB gets passed along into calcLand....() with 'True' indicating
+        #  using the average probabilty for the weights
+        self.calcLandscapeWeights(USE_AVE_PROB)
+        
+        #iterate over each beta and evaluate the gradient along it
+        for beta in range(len(b)):
+
+            #SEE MATHEMATICS DOCUMENTATION FOR A DETAILED EXPLANATION OF ALL THAT FOLLOWS
+
+            #variable to hold the sum of the delta(prob)/prop values
+            sum_delta_prob = 0
+
+            for l in range(len(self.landscape_set)):
+
+                #reset value for this landscape
+                sum_delta_prob = 0
+
+                for i in range(self.landscape_set[l].getIgnitionCount()):
+
+                    #making a function handle for ease
+                    spare_pol = FireGirlPolicy()
+                    logistic = spare_pol.logistic
+
+                    #NOTE: the individual landscapes have already had their policies updated
+                    #  to the current one in self.calcLandscapeWeights()
+
+                    #get the suppression choice of this landscape at this ignition
+                    choice = self.landscape_set[l].getChoice(i)
+                    #and set it to binary
+                    sup = 0
+                    if choice == True: sup = 1
+
+                    #get the new probability (according to the current policy) of suppressing
+                    # this ignition in this landscape
+                    prob_pol = self.landscape_set[l].getProb(i)
+
+                    #set the probability of actually doing what we did
+                    prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
+
+                    #checking for unreasonably small probabilities
+                    if prob == 0:
+                        prob = 0.00001
+
+                    #get the cross product of this landscape at this ignition
+                    cross_product = self.landscape_set[l].getCrossProduct(i)
+
+                    #get the feature of this landscape and this ignition for this beta
+                    flik = self.landscape_set[l].getFeature(i, beta)
+
+
+                    delta_lgstc = flik * logistic(cross_product) * (1 - logistic(cross_product))
+
+                    delta_prob = sup * delta_lgstc + (1 - sup)*(-1)*delta_lgstc
+                    
+                    if USE_AVE_PROB == False:
+                        sum_delta_prob += delta_prob / prob
+                    else:
+                        sum_delta_prob += delta_prob
+
+                
+                #finished adding up sum_delta_prob for all the ignitions in this landscape, so
+                # calculate the d/dx value:
+                
+                if USE_AVE_PROB == False:
+                    d_obj_d_bk[beta] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob
+                else:
+                    invI = (1 / self.landscape_set[l].getIgnitionCount())
+                    d_obj_d_bk[beta] += self.landscape_net_values[l] * invI * sum_delta_prob
+
+
+                #going on to the next landscape
+
+            #going on to the next beta
+
+        #finished with all betas
+
+        # because this is a minimization routine, and the objective function is being flipped, so too
+        #should be the derivatives
+        for b in range(len(d_obj_d_bk)):
+            d_obj_d_bk[b] *= -1
+
+
+        # And Finally, return the list
+        return scipy.array(d_obj_d_bk)
         
     def optimizePolicy(self, iterations=1, acceptance_threshold=None):
         #This function will work through the given number of gradient descent 
