@@ -39,6 +39,7 @@ ObjFn Val,     Params.....
 -4133.72       -10.0  10.0  9.958  -9.856  -9.855
 
 
+
 ############ RUNNING 100 landscapes with 200 "fires" ############
 Initial Values with Total Prob
 Obj Fn: -5.52790447132e-57

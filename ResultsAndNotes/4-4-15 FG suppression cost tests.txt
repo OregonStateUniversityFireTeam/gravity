@@ -1,0 +1,31 @@
+Using test_script_optimzer2.py
+
+_____________________________________________________________________________________________
+Here's a run with 100 landscapes, 50 fires, with suppression costs flipped to negatives,
+making suppression lucrative:
+
+Beginning Optimization Routine
+ObjFn Val,     Params.....
+               CONS   date   date2  temp   wind   timb   timb8  timb24  fuel  fuel8  fuel24
+-39332844.25   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0   0.0    0.0
+-39976319.89   1.846  2.131  0.821  1.576  2.509  1.894  1.632  1.325   2.61  2.352  1.615
+
+The policy has changed to a suppress-all scenario. 
+
+_____________________________________________________________________________________________
+Now suppression is free
+ObjFn Val,     Params.....
+               CONS   date   date2   temp    wind   timb   timb8  timb24  fuel   fuel8  fuel24
+-7726055.2     0.0    0.0    0.0     0.0     0.0    0.0    0.0     0.0    0.0    0.0    0.0
+-7877854.08   -5.24  -5.995  -2.499  -3.431  2.676  4.929  -10.0  -8.125  8.049  3.209  4.908
+
+Now there's a mixed policy
+
+_____________________________________________________________________________________________
+Now suppression is excessively costly
+ObjFn Val,      Params.....
+              CONS    date    date2    temp   wind    timb    timb8  timb24  fuel   fuel8   fuel24
+31599062989   0.0      0.0     0.0     0.0    0.0      0.0     0.0    0.0     0.0    0.0     0.0
+30924904134  -1.379  -1.445  -0.527  -1.201  -1.738  -1.627  -1.06  -1.157  -1.904 -1.645  -1.368
+
+Now there's a let-burn-all scenario
