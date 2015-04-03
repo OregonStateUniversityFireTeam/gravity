@@ -1,3 +1,5 @@
+4-3-15
+
 ############ RUNNING 100 landscapes with 15 "fires" ############
 
 Initial Values with Total Prob
