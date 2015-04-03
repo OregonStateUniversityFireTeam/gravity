@@ -1,4 +1,5 @@
 The following output shows a test of test_script_optimizer2.py, where I only changed the optimizer.USE_AVE_PROB flag.
+This was 10 landscapes, 20 fires.
 
 
 Beginning Optimization Routine
@@ -24,7 +25,7 @@ THE FEATURES ARE
                         "fuel load", "fuel load, ave8", "fuel load, ave 24" ]
 
                         
-which corresponds as follows
+which corresponds as follows    Higher values encourage:
 "CONSTANT",           -0.026    
 "date",               -0.138    let_burn
 "date squared",       -0.568    let_burn
@@ -36,3 +37,13 @@ which corresponds as follows
 "fuel load",          -0.008    let_burn?
 "fuel load, ave8",    -0.034    let_burn?
 "fuel load, ave 24",   0.125    suppress
+
+
+And Now here's a run (with USE_AVE_PROB=True) with 100 landscapes, 100 fires
+Beginning Optimization Routine
+ObjFn Val,     Params.....
+61889173.68       0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+60595121.69       -1.186  -1.117  -0.343  -1.036  -1.54  -1.622  -0.924  -0.953
+ -1.69  -1.453  -1.049
+ 
+ which has made all parameters encourage let-burn scenarios
