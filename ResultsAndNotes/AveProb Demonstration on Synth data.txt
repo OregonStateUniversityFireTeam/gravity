@@ -1,0 +1,60 @@
+############ RUNNING 100 landscapes with 15 "fires" ############
+
+Initial Values with Total Prob
+Obj Fn: -0.0364379882812
+Fprime: -0.62466431 -129.7638092   -71.73313904   61.80499268   83.11143494
+
+Initial Values with Ave. Prob
+Obj Fn: -597.0
+Fprime: -682.3     -141736.68333333  -78351.71666667   67507.53333333   90779.85
+
+Optimizing Policy using total-prob calculations
+ObjFn Val,     Params.....
+-0.04          0.0    0.0    0.0     0.0     0.0  
+-1033.36       0.099  1.319  0.612  -1.466  -1.619  
+
+Optimizing Policy using average-prob calculations
+ObjFn Val,     Params.....
+-597.0         0.0   0.0    0.0      0.0   0.0  
+-5935.07       10.0  9.717  9.304  -10.0  -9.336
+
+
+############ RUNNING 100 landscapes with 50 "fires" ############
+Initial Values with Total Prob
+Obj Fn: -1.41087141969e-12
+Fprime:  6.02669026e-11  -9.38124867e-09  -5.08153741e-09   3.52512930e-09   7.12969550e-09
+
+Initial Values with Ave. Prob
+Obj Fn: -794.25
+Fprime:  678.545  -105623.47    -57213.025    39689.4275   80273.235
+
+Optimizing Policy using total-prob calculations
+ObjFn Val,     Params.....
+-0.0       0.0  0.0  0.0  0.0  0.0  
+-0.0       0.0  0.0  0.0  0.0  0.0  
+
+Optimizing Policy using average-prob calculations
+ObjFn Val,     Params.....
+-794.25         0.0    0.0  0.0     0.0     0.0  
+-4133.72       -10.0  10.0  9.958  -9.856  -9.855
+
+
+############ RUNNING 100 landscapes with 200 "fires" ############
+Initial Values with Total Prob
+Obj Fn: -5.52790447132e-57
+Fprime: -5.71646183e-57  -3.40260316e-53  -1.07784140e-53   1.37259600e-53   1.51417589e-53
+
+Initial Values with Ave. Prob
+Obj Fn: -4441.5
+Fprime: -2.29650000e+01  -1.36694312e+05  -4.33006087e+04   5.51419181e+04   6.08296712e+04
+
+Optimizing Policy using total-prob calculations
+ObjFn Val,     Params.....
+-0.0       0.0  0.0  0.0  0.0  0.0  
+-0.0       0.0  0.0  0.0  0.0  0.0  
+
+Optimizing Policy using average-prob calculations
+ObjFn Val,     Params.....
+-4441.5        0.0    0.0     0.0   0.0     0.0  
+-8465.89       9.255  8.542  10.0  -9.051  -9.508
+

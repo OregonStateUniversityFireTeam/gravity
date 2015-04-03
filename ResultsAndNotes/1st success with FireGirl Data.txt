@@ -1,0 +1,38 @@
+The following output shows a test of test_script_optimizer2.py, where I only changed the optimizer.USE_AVE_PROB flag.
+
+
+Beginning Optimization Routine
+ObjFn Val,     Params.....
+0.0       0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+0.0       -0.0  -0.0  -0.001  -0.0  -0.0  -0.0  -0.0  -0.0  -0.0  -0.0  -0.0
+
+
+N:\docs\Projects\FireGirl\gravity>python test_script_optimizer2.py
+
+
+Beginning Optimization Routine
+ObjFn Val,     Params.....
+3801380.4       0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+3493761.0       -0.026  -0.138  -0.568  -0.024  0.134  0.075  -0.004  0.248  -0.008  -0.034  0.125
+
+
+
+
+THE FEATURES ARE
+"CONSTANT", "date", "date squared", "temperature", "wind speed", 
+                        "timber value", "timber value, ave8", "timber value, ave24", 
+                        "fuel load", "fuel load, ave8", "fuel load, ave 24" ]
+
+                        
+which corresponds as follows
+"CONSTANT",           -0.026    
+"date",               -0.138    let_burn
+"date squared",       -0.568    let_burn
+"temperature",        -0.024    let_burn?
+"wind speed",          0.134    suppress
+"timber value",        0.075    suppress?
+"timber value, ave8", -0.004    let_burn?
+"timber value, ave24", 0.248    suppress
+"fuel load",          -0.008    let_burn?
+"fuel load, ave8",    -0.034    let_burn?
+"fuel load, ave 24",   0.125    suppress
