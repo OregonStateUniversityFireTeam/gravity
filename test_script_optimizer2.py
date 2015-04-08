@@ -1,18 +1,18 @@
-from FireGirl_Optimizer import *
+from FireGirlOptimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
 ###To create, uncomment the following two lines:
-FGPO.createFireGirlLandscapes(100,50)
-#FGPO.saveFireGirlLandscapes("FG_landscapes_20x50.fgl")
+FGPO.createFireGirlPathways(100,50)
+#FGPO.saveFireGirlPathways("FG_pathways_20x50.fgl")
 
 ###To load (already created data), uncomment the following line
-#FGPO.loadFireGirlLandscapes("FG_landscapes_20x50.fgl")
+#FGPO.loadFireGirlPathways("FG_pathways_20x50.fgl")
 
 
 #print("objfn: " + str(FGPO.calcObjFn()))
 #print("fprme: " + str(FGPO.calcObjFPrime()))
-#print("weights: " + str(FGPO.landscape_weights))
-#print("net values: " + str(FGPO.landscape_net_values))
+#print("weights: " + str(FGPO.pathway_weights))
+#print("net values: " + str(FGPO.pathway_net_values))
 
 #setting new policy
 b = [0,0,0,0,0,0,0,0,0,0,0]
@@ -22,8 +22,8 @@ print(" ")
 #print("Under Wind/Temp Policy: ")
 #print("objfn: " + str(FGPO.calcObjFn()))
 #print("fprme: " + str(FGPO.calcObjFPrime()))
-#print("weights: " + str(FGPO.landscape_weights))
-#print("net values: " + str(FGPO.landscape_net_values))
+#print("weights: " + str(FGPO.pathway_weights))
+#print("net values: " + str(FGPO.pathway_net_values))
 
 ###To Optimize, uncomment the following
 print("Beginning Optimization Routine")

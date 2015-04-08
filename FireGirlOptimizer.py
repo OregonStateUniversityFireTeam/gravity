@@ -1,23 +1,23 @@
-from FireGirl_Landscape import *
-from FireGirl_Policy import *
+from FireGirlPathway import *
+from FireGirlPolicy import *
 import math, scipy, pickle
 from scipy.optimize import *
 
 class FireGirlPolicyOptimizer:
-    def __init__(self, USING_FIREGIRL_LANDSCAPES=True):
-        #A list to hold all the landscapes in a data set, whether they represent FireGirl or
-        #    FireWoman landscapes
-        self.landscape_set = []
+    def __init__(self, USING_FIREGIRL_PATHWAYS=True):
+        #A list to hold all the pathways in a data set, whether they represent FireGirl or
+        #    FireWoman pathways
+        self.pathway_set = []
         
-        #A list to hold the net values of each landscape in the data set
-        self.landscape_net_values =[]
+        #A list to hold the net values of each pathway in the data set
+        self.pathway_net_values =[]
         
-        #A list to hold the "probability weights" of each landscape
-        self.landscape_weights = []
+        #A list to hold the "probability weights" of each pathway
+        self.pathway_weights = []
         
         #Boundaries for what the parameters can be set to during scipy's optimization routine:
         self.b_bounds = []
-        if USING_FIREGIRL_LANDSCAPES == True:
+        if USING_FIREGIRL_PATHWAYS == True:
             for i in range(11):
                 self.b_bounds.append([-10,10])
 
@@ -25,20 +25,20 @@ class FireGirlPolicyOptimizer:
         #                                 To just multiply probabilities, set to False
         self.USE_LOG_PROB = False
         
-        #Flag: Use average probability instead of total probability on the landscape weight
+        #Flag: Use average probability instead of total probability on the pathway weight
         #   calculations
         self.USE_AVE_PROB = False
 
-        #Flag: Using FireGirl landscapes = True
-        #      Using FireWoman landscapes = False
-        self.USING_FIREGIRL_LANDSCAPES = USING_FIREGIRL_LANDSCAPES
+        #Flag: Using FireGirl pathways = True
+        #      Using FireWoman pathways = False
+        self.USING_FIREGIRL_PATHWAYS = USING_FIREGIRL_PATHWAYS
 
 
-        #The policy that is controlling each landscape's fire suppression choices
+        #The policy that is controlling each pathway's fire suppression choices
         #This should be set to one of the two child classes of HKBFire_Policy: 
         #  FireGirl_Policy or FireWoman_Policy
 
-        if USING_FIREGIRL_LANDSCAPES == True:
+        if USING_FIREGIRL_PATHWAYS == True:
             #FireGirl uses 11 parameters, so set them all to 0 (coin-toss policy)
             self.Policy = FireGirlPolicy(None,0,11)
         else:
@@ -47,12 +47,12 @@ class FireGirlPolicyOptimizer:
 
 
         ##########################################################################################
-        #FireGirl-specific flags and data members. These are unused if FireWoman-style landscapes
+        #FireGirl-specific flags and data members. These are unused if FireWoman-style pathways
         #    are being used
         ##########################################################################################
 
-        #A flag for whether or not to include ending landscapes' standing timber
-        #   value in the total landscape value
+        #A flag for whether or not to include ending pathways' standing timber
+        #   value in the total pathway value
         self.count_standing_timber = False
       
 
@@ -61,28 +61,28 @@ class FireGirlPolicyOptimizer:
     # Optimization Functions #
     ##########################
 
-    def calcLandscapeWeights(self, USE_SELF_POLICY=True):
-        #This function looks through each fire of a given landscape and applies the current
+    def calcPathwayWeights(self, USE_SELF_POLICY=True):
+        #This function looks through each fire of a given pathway and applies the current
         #  policy to the features of each one. The resulting 'probability' from the policy 
         #  function is either multiplied or 'log-summed' be the others to produce the final 
-        #  weighting value. This is done for every landscape in the landscape_set, and each
-        #  weight is assigned to landscape_weights[] at the same index as their landscape in 
-        #  the landscape_set list
+        #  weighting value. This is done for every pathway in the pathway_set, and each
+        #  weight is assigned to pathway_weights[] at the same index as their pathway in 
+        #  the pathway_set list
 
         #clearing old weights
-        self.landscape_weights = []
+        self.pathway_weights = []
 
-        #iterating over each landscape and appending each new weigh to the list
-        for ls in self.landscape_set:
+        #iterating over each pathway and appending each new weigh to the list
+        for ls in self.pathway_set:
 
-            #setting the landscape's USE_LOG_PROB flag to match the optimizer's flag
+            #setting the pathway's USE_LOG_PROB flag to match the optimizer's flag
             ls.USE_LOG_PROB = self.USE_LOG_PROB
         
-            #setting this landscape's policy to the current one
+            #setting this pathway's policy to the current one
             if USE_SELF_POLICY == True:
                 ls.assignPolicy(self.Policy)
             else:
-                #setting this to false indicates that the landscapes have their own policies
+                #setting this to false indicates that the pathways have their own policies
                 # (possibly applied elsewhere) and that they should use them, instead of
                 # taking the optimizer's current policy. Mostly used for testing
                 pass
@@ -96,16 +96,16 @@ class FireGirlPolicyOptimizer:
                 #TESTING - USING Average Probability instead of total probability
                 p = ls.calcAveProb()
             
-            self.landscape_weights.append(p)
+            self.pathway_weights.append(p)
 
     def calcObjFn(self, b=None):
         #This function contains the optimization objective function. It operates
-        #  on the current list of landscapes. If any values for 'b' are passed in,
+        #  on the current list of pathways. If any values for 'b' are passed in,
         #  (most likely by scipy.optimize.fmin_l_bfgs_b(), then they are assigned
         #  to the current HKBFire_Policy object so that subsequent function calls
         #  will use the correct ones.
                 
-        #The objective function is the sum of each landscape's net value, weighted
+        #The objective function is the sum of each pathway's net value, weighted
         #  by the overall probability of its suppression choices. This probabilty
         #  is simply the suppression decision values from the logistic function
         #  all multiplied together.
@@ -118,30 +118,30 @@ class FireGirlPolicyOptimizer:
         if not b == None:
             self.Policy.setParams(b)
 
-        #Note: self.calcLandscapeWeights will assign this policy to each landscape
+        #Note: self.calcPathwayWeights will assign this policy to each pathway
 
         # Calculate the weights... these will use the current Policy
-        #    rather than whatever policy the landscapes used during simulation
+        #    rather than whatever policy the pathways used during simulation
         #    Typically, this will be the multiplied total of the inidividual probabilities
         #    associated with following or not-following the policy
-        self.calcLandscapeWeights()
+        self.calcPathwayWeights()
 
-        #Note: self.landscape_net_values is being assigned either in:
-        #   1) createFireGirlLandscapes() when those landscapes are first made
-        #   2) loadFireGirlLandscapes() when those landscapes are loaded up
-        #   3) loadFireWomanLandscapes() when those landscapes are loaded up
+        #Note: self.pathway_net_values is being assigned either in:
+        #   1) createFireGirlPathways() when those pathways are first made
+        #   2) loadFireGirlPathways() when those pathways are loaded up
+        #   3) loadFireWomanPathways() when those pathways are loaded up
 
         #now assign them to the local list, for ease
-        self.landscape_net_values = []
-        for ls in self.landscape_set:
-            self.landscape_net_values.append(ls.net_value)
+        self.pathway_net_values = []
+        for ls in self.pathway_set:
+            self.pathway_net_values.append(ls.net_value)
         
-        #a variable to hold the sum of ALL the probability-weighted landscape values
+        #a variable to hold the sum of ALL the probability-weighted pathway values
         total_value = 0
         
         #loop over all the values/weights and sum them
-        for ls in range(len(self.landscape_set)):
-            total_value += self.landscape_net_values[ls] * self.landscape_weights[ls]
+        for ls in range(len(self.pathway_set)):
+            total_value += self.pathway_net_values[ls] * self.pathway_weights[ls]
         
 
 
@@ -167,7 +167,7 @@ class FireGirlPolicyOptimizer:
 
         #  d Obj()/d b_k value is 
         #
-        #   Sum over landscapes [ val_l * product over ignitions [ prob_i ] * sum over ignitions [d wrt prob / prob] ]
+        #   Sum over pathways [ val_l * product over ignitions [ prob_i ] * sum over ignitions [d wrt prob / prob] ]
         #
         #   where d wrt prob =  sup_i * d(logistic(b*f)) + (1 - sup_i)(-1) (d(logistic(b*f)))
         #
@@ -186,9 +186,9 @@ class FireGirlPolicyOptimizer:
         for i in range(len(b)):
             d_obj_d_bk.append(0)
             
-        #get the weight (total or ave) for each landscape decision sequence using the 
+        #get the weight (total or ave) for each pathway decision sequence using the 
         #   current policy (which is possibly being varied by l_bfgs, etc...)
-        self.calcLandscapeWeights()
+        self.calcPathwayWeights()
 
         #making a function handle for ease within the loop
         spare_pol = FireGirlPolicy()
@@ -202,25 +202,25 @@ class FireGirlPolicyOptimizer:
             #variable to hold the sum of the delta(prob)/prop values
             sum_delta_prob = 0
 
-            for l in range(len(self.landscape_set)):
+            for l in range(len(self.pathway_set)):
 
-                #reset value for this landscape
+                #reset value for this pathway
                 sum_delta_prob = 0
 
-                for i in range(self.landscape_set[l].getIgnitionCount()):
+                for i in range(self.pathway_set[l].getIgnitionCount()):
 
-                    #NOTE: the individual landscapes have already had their policies updated
-                    #  to the current one in self.calcLandscapeWeights()
+                    #NOTE: the individual pathways have already had their policies updated
+                    #  to the current one in self.calcPathwayWeights()
 
-                    #get the suppression choice of this landscape at this ignition
-                    choice = self.landscape_set[l].getChoice(i)
+                    #get the suppression choice of this pathway at this ignition
+                    choice = self.pathway_set[l].getChoice(i)
                     #and set it to binary
                     sup = 0
                     if choice == True: sup = 1
 
                     #get the new probability (according to the current policy) of suppressing
-                    # this ignition in this landscape
-                    prob_pol = self.landscape_set[l].getProb(i)
+                    # this ignition in this pathway
+                    prob_pol = self.pathway_set[l].getProb(i)
 
                     #set the probability of actually doing what we did
                     prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
@@ -229,11 +229,11 @@ class FireGirlPolicyOptimizer:
                     if prob == 0:
                         prob = 0.00001
 
-                    #get the cross product of this landscape at this ignition
-                    cross_product = self.landscape_set[l].getCrossProduct(i)
+                    #get the cross product of this pathway at this ignition
+                    cross_product = self.pathway_set[l].getCrossProduct(i)
 
-                    #get the feature of this landscape and this ignition for this beta
-                    flik = self.landscape_set[l].getFeature(i, beta)
+                    #get the feature of this pathway and this ignition for this beta
+                    flik = self.pathway_set[l].getFeature(i, beta)
 
 
                     delta_lgstc = flik * logistic(cross_product) * (1.0 - logistic(cross_product))
@@ -246,18 +246,18 @@ class FireGirlPolicyOptimizer:
                         sum_delta_prob += delta_prob
 
                 
-                #finished adding up sum_delta_prob for all the ignitions in this landscape, so
+                #finished adding up sum_delta_prob for all the ignitions in this pathway, so
                 # calculate the d/dx value:
                 
                 if self.USE_AVE_PROB == False:
-                    d_obj_d_bk[beta] += self.landscape_net_values[l] * self.landscape_weights[l] * sum_delta_prob
+                    d_obj_d_bk[beta] += self.pathway_net_values[l] * self.pathway_weights[l] * sum_delta_prob
                 else:
-                    invI = (1.0 / self.landscape_set[l].getIgnitionCount())
-                    d_obj_d_bk[beta] += self.landscape_net_values[l] * invI * sum_delta_prob
+                    invI = (1.0 / self.pathway_set[l].getIgnitionCount())
+                    d_obj_d_bk[beta] += self.pathway_net_values[l] * invI * sum_delta_prob
                     
                     
 
-                #going on to the next landscape
+                #going on to the next pathway
 
             #going on to the next beta
 
@@ -275,7 +275,7 @@ class FireGirlPolicyOptimizer:
        
     def optimizePolicy(self, iterations=1, acceptance_threshold=None):
         #This function will work through the given number of gradient descent 
-        #  iterations using the current set of landscapes for its data set.
+        #  iterations using the current set of pathways for its data set.
         #It returns a list containing two elements
         #  -The first is a list of the policy parameters used in
         #  each iteration
@@ -365,9 +365,9 @@ class FireGirlPolicyOptimizer:
     ###############################
     # FireGirl-specific Functions #
     ###############################
-    def createFireGirlLandscapes(self, landscape_count, years, policy=None):
-        #This function creates a new set of FireGirl-style landscapes (deleting all current
-        #    landscape data)
+    def createFireGirlPathways(self, pathway_count, years, policy=None):
+        #This function creates a new set of FireGirl-style pathways (deleting all current
+        #    pathway data)
         
         #Check if we need a new policy, or if one was passed in
         if policy == None:
@@ -377,71 +377,71 @@ class FireGirlPolicyOptimizer:
             #one was passed, so set it.
             self.Policy = policy
         
-        #Clear the landscape_set list in case there's old landscapes in it
-        self.landscape_set = []
+        #Clear the pathway_set list in case there's old pathways in it
+        self.pathway_set = []
         
-        #Create new landscapes and add them to the landscape_set list
-        for i in range(landscape_count):
-            self.landscape_set.append(FireGirlLandscape(i, self.Policy))
+        #Create new pathways and add them to the pathway_set list
+        for i in range(pathway_count):
+            self.pathway_set.append(FireGirlPathway(i, self.Policy))
         
-        #Have each landscape create new data for itself. Right now their timber_values 
+        #Have each pathway create new data for itself. Right now their timber_values 
         #   and fuel_loads are set uniformally to zero
-        for ls in self.landscape_set:
+        for ls in self.pathway_set:
 
-            #have each landscape create timber/fuel data for itself
-            print("Creating landscape " + str(ls.ID_number))
-            ls.generateNewLandscape()
+            #have each pathway create timber/fuel data for itself
+            print("Creating pathway " + str(ls.ID_number))
+            ls.generateNewPathway()
 
-            #Have each landscape simulate for the given number of years
+            #Have each pathway simulate for the given number of years
             ls.doYears(years)
 
-            #and after all years are finished, have each landscape calculate its net value
+            #and after all years are finished, have each pathway calculate its net value
             ls.updateNetValue()
         
         #DEPRECATED
-        #Finish up by calculating the final values of each landscape
-        #print("Summing Landscape Values")
-        #self.sumLandscapeValues()
+        #Finish up by calculating the final values of each pathway
+        #print("Summing pathway Values")
+        #self.sumPathwayValues()
 
 
     ###################
     # Other Functions #
     ###################
-    def saveFireGirlLandscapes(self, filename):
+    def saveFireGirlPathways(self, filename):
         output = open(filename, 'wb')
 
         # Pickle dictionary using default protocol 0.
-        pickle.dump(self.landscape_set, output)
+        pickle.dump(self.pathway_set, output)
 
         output.close()
 
-    def loadFireGirlLandscapes(self, filename):
-        #This function loads a saved set of FireGirl Landscapes
+    def loadFireGirlPathways(self, filename):
+        #This function loads a saved set of FireGirl pathways
 
         pkl_file = open(filename, 'rb')
 
-        self.landscape_set = []
-        self.landscape_set = pickle.load(pkl_file)
+        self.pathway_set = []
+        self.pathway_set = pickle.load(pkl_file)
 
         pkl_file.close()
 
         #and do the post-processing
         
-        #force each landscape to update their values
-        for ls in self.landscape_set:
+        #force each pathway to update their values
+        for ls in self.pathway_set:
             ls.updateNetValue()
 
-    def loadFireWomanLandscapes(self, filename):
-        #This function loads a saved set of FireWoman Landscapes
+    def loadFireWomanPathways(self, filename):
+        #This function loads a saved set of FireWoman Pathways
 
-        #REMINDER: this function needs to assign values to self.landscape_net_values
+        #REMINDER: this function needs to assign values to self.pathway_net_values
 
         pass
 
     def setPolicy(self, policy):
-        #take the policy given and give it to every landscape in the current set.
+        #take the policy given and give it to every pathway in the current set.
         self.Policy = policy
-        for ls in self.landscape_set:
+        for ls in self.pathway_set:
             ls.assignPolicy(self.Policy)
 
     def resetPolicy(self):

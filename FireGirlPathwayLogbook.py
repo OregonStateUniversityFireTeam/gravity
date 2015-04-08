@@ -1,6 +1,6 @@
 class FireGirlIgnitionRecord:
     #This class holds the salient information from any igition, either in FireGirl or
-    #  in FireWoman landscapes.
+    #  in FireWoman pathways.
 
     #self.features is a list of feature values known at the beginning of each ignition
     #   event. This should only contain information that a fire manager would know at 
@@ -89,7 +89,7 @@ class FireGirlIgnitionRecord:
         return prob
 
 
-class FireGirl_Landscape_Logbook:
+class FireGirlPathwayLogbook:
     # This class defines an entire logbook
     
     def __init__(self):
@@ -115,7 +115,7 @@ class FireGirl_Landscape_Logbook:
         if year_found == False:
             #print("LogBook.checkYearExists(...) didn't find a year, so creating one")
             #no item with this year in the logbook, so make a new one and append it.
-            item = FireGirl_Landscape_Logbook_Item()
+            item = FireGirlPathwayLogbookItem()
             item.year = year
             #print("  before append, list contains: " + str(len(self.log_list)))
             self.log_list.append(item)    
@@ -143,7 +143,7 @@ class FireGirl_Landscape_Logbook:
         #if the year wasn't found in the logbook, create and add a new item
         if year_found == False:
             #new logbook item
-            item = FireGirl_Landscape_Logbook_Item(year, date, loc, temp, wind, timber, timber_ave8, timber_ave24, 
+            item = FireGirl_Pathway_Logbook_Item(year, date, loc, temp, wind, timber, timber_ave8, timber_ave24, 
                                                    fuel, fuel_ave8, fuel_ave24, suppress_prob, suppress_decision,
                                                     cells_burned, timber_lost, logging_total, eco1, eco2, eco3)
             #add item to the list
@@ -317,8 +317,8 @@ class FireGirl_Landscape_Logbook:
                 break
 
 
-class FireGirl_Landscape_Logbook_Item:
-    # This class defines a single entry in a landscape logbook
+class FireGirlPathwayLogbookItem:
+    # This class defines a single entry in a pathway logbook
     
     def __init__(self, year=None, date=None, loc=None, temp=None, wind=None, 
                     timber=None, timber_ave8=None, timber_ave24=None, 
@@ -441,9 +441,9 @@ class FireGirl_Landscape_Logbook_Item:
         if not self.eco3 == None: print("  eco3: " + str(self.eco3))
         
         
-class FireGirl_FireLog:
+class FireGirlFireLog:
     #This class defines a logbook for a single fire. The location of each cell
-    #that burns, and the local fire time (not the landscape year) is recorded.
+    #that burns, and the local fire time (not the pathway year) is recorded.
         
     def __init__(self, year):
 

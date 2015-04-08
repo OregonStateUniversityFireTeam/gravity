@@ -1,10 +1,10 @@
-from FireGirl_Landscape import *
-from FireGirl_Policy import *
+from FireGirlPathway import *
+from FireGirlPolicy import *
 import random
 
 pol = FireGirlPolicy(None,0,10) # <- creates a FireGirl-style policy
 
-lndscpe = FireGirlLandscape(1,pol,True)
+lndscpe = FireGirlPathway(1,pol,True)
 
 #testing .drawIgnitionDay()
 no_ig = 0
@@ -29,14 +29,14 @@ for i in range(1000):
 		if d > 364:
 			fail = True
 	
-print('Test 1:  landscape.drawIgnitionDay() returned ' + str(no_ig) + ' no-ignition events out of 1000')
+print('Test 1:  pathway.drawIgnitionDay() returned ' + str(no_ig) + ' no-ignition events out of 1000')
 print("     high: " + str(high) + "   low: " + str(low))
 if fail:
-	print('   test failed: landscape.drawIgnitionDay()... Some values out of bounds')
+	print('   test failed: pathway.drawIgnitionDay()... Some values out of bounds')
 print(" ")
 	
 #lndscpe.drawLocation(self)
-	#This function chooses a random location on the landscape and returns
+	#This function chooses a random location on the pathway and returns
 	#  it as a two-element list
 	
 	#I'm only allowing fires to start from within the center 43x43 block,
@@ -63,7 +63,7 @@ for i in range(365):
 	if mean > high:
 		high = mean
 		high_day = i
-print("Test 2:  landscape.tempMean(self,date) returns:")
+print("Test 2:  pathway.tempMean(self,date) returns:")
 print("    Coldest day: " + str(low_day) + " with temp = " + str(low))
 print("    Hottest day: " + str(high_day) + " with temp = " + str(high))
 print(" ")
@@ -94,7 +94,7 @@ for day in range(4):
 		day_sum[day] += temp
 for day in range(4):
 	day_mean[day] = day_sum[day] / 1000
-print("Test 3:  landscape.drawTemperature(self, date)")
+print("Test 3:  pathway.drawTemperature(self, date)")
 print("  day 0:   low = " + str(day_low[0]) + ", high = " + str(day_high[0]) + ", mean = " + str(day_mean[0]) )
 print("  day 90:  low = " + str(day_low[1]) + ", high = " + str(day_high[1]) + ", mean = " + str(day_mean[1]) )
 print("  day 180: low = " + str(day_low[2]) + ", high = " + str(day_high[2]) + ", mean = " + str(day_mean[2]) )
@@ -141,10 +141,10 @@ for i in range(11):
 print("  Speeds > 110: " + str(speeds[11]))
 print(" ")
 
-#testing .generateNewLandscape()
-print("TEST 5: .generateNewLandscape()"),
+#testing .generateNewPathway()
+print("TEST 5: .generateNewPathway()"),
 try:		
-	lndscpe.generateNewLandscape()
+	lndscpe.generateNewPathway()
 	print(": success")
 except:
 	print(": FAILED")
@@ -241,7 +241,7 @@ print("100 yields:     " + str(lndscpe.calcCrownFireRisk(100))  )
 print(" ")			
 
 
-#testing .generateNewLandscape()
+#testing .generateNewPathway()
 print("TEST 10: .doOneYear"),
 try:		
 	lndscpe.doOneYear()
@@ -251,7 +251,7 @@ except:
 print(" ")
 
 
-#testing .generateNewLandscape()
+#testing .generateNewPathway()
 print("TEST 11: .doYears(...)"),
 try:		
 	lndscpe.doYears(4)

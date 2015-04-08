@@ -1,15 +1,15 @@
 import random, math
 from FireGirl_DS_alg import *
-from FireGirl_Policy import *
-from FireGirl_Landscape_Logbook import *
+from FireGirlPolicy import *
+from FireGirlPathwayLogbook import *
 
-class FireGirlLandscape:
-    #This class holds a single FireGirl landscape, and has all the necessary 
+class FireGirlPathway:
+    #This class holds a single FireGirl pathway, and has all the necessary 
     #  functions to allow it to evolve, change, etc..., as well as to read/write
     #  the data to file.
     
     ###FEATURE VALUES ###
-    # For the suppression rule in FireGirl landscapes, the following are the 
+    # For the suppression rule in FireGirl pathways, the following are the 
     #     features being used:
     #
     #  Wind Speed - one value per day/fire
@@ -24,7 +24,7 @@ class FireGirlLandscape:
     #  Average Fuel Load adjacent 24
     
     def __init__(self, ID_number, policy_object=None, FIREGIRL_DATA=True):
-        #The ID of the landscape is used to uniquely identify it for file in/out 
+        #The ID of the pathway is used to uniquely identify it for file in/out 
         # functions, and to seed it's random number generation procedures, for 
         # replicability
 
@@ -36,16 +36,16 @@ class FireGirlLandscape:
         
         #The policy object is defined in FireGirl_Policy.py, and contains everything
         #  required to evaluate a set of features against a given policy. To the
-        #  landscape object, this operates as a black box.
+        #  pathway object, this operates as a black box.
 
         self.Policy = None
         if policy_object == None:
             #No policy was given, so create a new one:
             if FIREGIRL_DATA == True:
-                #This is a FireGirl landscape, so make a new policy with 11 parameters
+                #This is a FireGirl pathway, so make a new policy with 11 parameters
                 self.Policy = FireGirlPolicy(None,0,11)
             else:
-                #This is a FireWoman landscape, so make a new policy appropriately...
+                #This is a FireWoman pathway, so make a new policy appropriately...
                 self.Policy = FireGirlPolicy(None,0,50) #TODO: HOW MANY FOR FIREWOMAN?
         else:
             #A policy was passed to the constructor, so just use it and assume the user
@@ -56,7 +56,7 @@ class FireGirlLandscape:
         # A list of each ignition event, recorded as FireGirlIgnitonRecord objects
         self.ignitions = []
 
-        # A value to hold the net value of the landscape after all fires, suppresions, 
+        # A value to hold the net value of the pathway after all fires, suppresions, 
         #    etc...
         self.net_value = 0
 
@@ -70,14 +70,14 @@ class FireGirlLandscape:
         self.USE_LOG_PROB = False
 
         
-        #The current landscape year starts at 0 and then increments as needed.
-        #  It is used, along with the landscape's ID number, to seed the random
+        #The current pathway year starts at 0 and then increments as needed.
+        #  It is used, along with the pathway's ID number, to seed the random
         #  number generator. Mainly this is because replicability needs to be 
-        #  retained even if the landscape is saved, loaded, etc... without repeating
+        #  retained even if the pathway is saved, loaded, etc... without repeating
         #  numbers already drawn.
         self.year = 0
         
-        #A flag that indicates whether or not this landscape contains FireGirl Data
+        #A flag that indicates whether or not this pathway contains FireGirl Data
         #   Set True if so, and False if its using FireWoman data
         self.FIREGIRL_DATA = FIREGIRL_DATA
 
@@ -95,8 +95,8 @@ class FireGirlLandscape:
             #  determinant of whether a fire burns into the crowns, determining the 
             #  timber_value that is lost, or not, by the blaze.
                     
-            #The Logbook object allows this landscape to record its yearly history
-            self.Logbook = FireGirl_Landscape_Logbook()
+            #The Logbook object allows this pathway to record its yearly history
+            self.Logbook = FireGirl_Pathway_Logbook()
 
             #Starting a list to hold FireGirl_FireLog objects. Each one holds a full 
             #  record of one fire, including the cells that burn, when they burn, and 
@@ -205,7 +205,7 @@ class FireGirlLandscape:
             self.growth_timber_constant = 22.0
             self.growth_fuel_accumulation = 2
 
-            #a list to hold each year's total landscape growth amount
+            #a list to hold each year's total pathway growth amount
             self.yearly_growth_totals = []
 
 
@@ -263,10 +263,10 @@ class FireGirlLandscape:
 
         #checking bounds
         if ignition_index >= len(self.ignitions):
-            print("Error in FGLandscape.getFeature(i,k): There is no ignition at index i")
+            print("Error in FGPathway.getFeature(i,k): There is no ignition at index i")
         else:
             if k >= len(self.ignitions[ignition_index].getFeatures()):
-                print("Error in FGLandscape.getFeature(i,k): There is no feature at index k")
+                print("Error in FGPathway.getFeature(i,k): There is no feature at index k")
                 print(" -feature list has " + str(len(self.ignitions[ignition_index].getFeatures())) + " elements.")
                 print(" -function call requesting element at index " + str(k))
 
@@ -296,7 +296,7 @@ class FireGirlLandscape:
             break_loop = False
             
             if self.DEBUG == True:
-                print("In ls.calcTotalProb()...  Landscape " + str(self.ID_number))
+                print("In ls.calcTotalProb()...  Pathway " + str(self.ID_number))
                 
             for ign in self.ignitions:
                 if self.DEBUG == True:
@@ -321,7 +321,7 @@ class FireGirlLandscape:
                     product *= p_actual
                     
                 except (TypeError):
-                    print("FGLandscape.calcTotalProb() encountered a TypeError:")
+                    print("FGPathway.calcTotalProb() encountered a TypeError:")
                     print(" ignition.getProb() returns: " + str(ign.getProb()))
                     print(" ignition.features are:")
                     print(ign.features)
@@ -335,7 +335,7 @@ class FireGirlLandscape:
                     product = 0.0
 
                     #and report it
-                    print("a FireGirlLandscape object reports an underflow condition during a PRODUCT calculation")
+                    print("a FireGirlPathway object reports an underflow condition during a PRODUCT calculation")
 
                     #and don't bother with any more multiplications
                     break_loop = True
@@ -374,7 +374,7 @@ class FireGirlLandscape:
                 total_prob = 0.0
 
                 #and report it
-                print("a FireGirlLandscape object reports an underflow condition during a SUMMATION calculation")
+                print("a FireGirlPathway object reports an underflow condition during a SUMMATION calculation")
 
 
         return total_prob
@@ -413,7 +413,7 @@ class FireGirlLandscape:
 
     def setYear(self, year):
         #this is intended to be used when loading data from saved FireGirl or FireWoman
-        #  data, etc...  FireGirl landscapes will update it themselves when they're evolving.
+        #  data, etc...  FireGirl pathways will update it themselves when they're evolving.
         self.year = year
     
     
@@ -508,8 +508,8 @@ class FireGirlLandscape:
         day = random.expovariate(1) * self.fire_average_end_day
         return day + 1  #give them at least one day...
 
-    def generateNewLandscape(self):
-        #This function will erase all current data in this landscape and 
+    def generateNewPathway(self):
+        #This function will erase all current data in this pathway and 
         #  generate new values for timber/fuels, etc... It will also reset the 
         #  current year to 0.
         
@@ -714,7 +714,7 @@ class FireGirlLandscape:
         return total
 
     def updateNetValue(self):
-        #This function makes the landscape go through it's full history and add/subtract up 
+        #This function makes the pathway go through it's full history and add/subtract up 
         #  all the costs and gains it's incurred in it's history. This value is then
         #  assigned to self.net_value, and also returned to the function caller.
 
@@ -937,7 +937,7 @@ class FireGirlLandscape:
         #Adding the final results to the fire_log_item
         fire_log_item.updateResults(timber_loss, cells_burned)
         
-        #add the FireLog item to the landscape's list (it's just an ordinary list)
+        #add the FireLog item to the pathway's list (it's just an ordinary list)
         self.FireLog.append(fire_log_item)
 
 
@@ -1095,7 +1095,7 @@ class FireGirlLandscape:
 
 
     def doOneYear(self):
-        #This function advances the current landscape by one year
+        #This function advances the current pathway by one year
         #Steps:
         #   1) Draw a new ignition (if any)
         #   2) If there's an ignition, apply the current suppression rule
@@ -1103,7 +1103,7 @@ class FireGirlLandscape:
         #   4) Do the growth model
         #   5) Do the logging model
         #
-        #   in each step) In this landscape's Logbook, record:
+        #   in each step) In this pathway's Logbook, record:
         #       a) the year
         #       b) the features of the ignition (if any)
         #       c) for reporting, fire results (timber loss and cells burned)
@@ -1257,7 +1257,7 @@ class FireGirlLandscape:
         #print("Beginning year " + str(self.year))
         
     def doYears(self, number_of_years):
-        #this function will process any number of landscape years, starting with
+        #this function will process any number of pathway years, starting with
         #  the current year in self.year.  After each, it will increment self.year
         #  by one and continue
         for y in range(number_of_years):

@@ -1,9 +1,9 @@
-from FireGirl_Landscape import *
+from FireGirlPathway import *
 
-#create new landscape, id=0, default policy, default as FireGirlLandscape
-ls = FireGirlLandscape(0)
+#create new Pathway, id=0, default policy, default as FireGirlPathway
+ls = FireGirlPathway(0)
 
-ls.generateNewLandscape()
+ls.generateNewPathway()
 
 print '{0:6} {1:12} {2:12} {3:12} {4:12} {5:12} {6:12}'.format(
                'Year', 'Choice', 'Cells Brnd', 'Timb Loss', 'Sup. Cost', 'Harvest Totl', 'Growth Totl')

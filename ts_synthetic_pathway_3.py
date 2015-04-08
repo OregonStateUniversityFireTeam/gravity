@@ -1,17 +1,17 @@
-from FireGirl_Optimizer import *
+from FireGirlOptimizer import *
 import random
 
 random.seed(0)
 
-#create landscapes
-landscapes = []
+#create pathways
+pathways = []
 for l in range(100):
-    landscapes.append(FireGirlLandscape(l))
+    pathways.append(FireGirlPathway(l))
 
 
 #create ignitions
-for ls in landscapes:
-    for i in range(200):
+for ls in pathways:
+    for i in range(15):
         ign = FireGirlIgnitionRecord()
         f1 = random.randint(-100,100)
         f2 = random.randint(-100,100)
@@ -48,47 +48,73 @@ for ls in landscapes:
                 
 #create optimizer
 opt = FireGirlPolicyOptimizer()
-opt.landscape_set = landscapes
+opt.pathway_set = pathways
 
-#Printing values with Total Prob
 objfn1 = opt.calcObjFn()
 fprm1 = opt.calcObjFPrime()
 
 #Printing initial values
-print("Initial Values with Total Prob")
-print("Obj Fn: " + str(objfn1))
-print("Fprime: " + str(fprm1))
-
-#Printing values with Ave Prob
-opt.USE_AVE_PROB = True
-objfn1 = opt.calcObjFn()
-fprm1 = opt.calcObjFPrime()
-
-#Printing initial values
-print(" ")
-print("Initial Values with Ave. Prob")
+print("Initial Values")
 print("Obj Fn: " + str(objfn1))
 print("Fprime: " + str(fprm1))
 
 
-#Optimizing with total prob
+#optimize on just paramter 1
+#setting bounds
+bounds_p1_only = [[0,0],[-10,10],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+opt.b_bounds = bounds_p1_only
 if True:
-
     print(" ")
     print(" ")
-    print("Optimizing Policy using total-prob calculations")
-    opt.USE_AVE_PROB = False
+    print("Optimizing Policy on paramter 1 only, beginning with a coin-toss policy ")
     opt.Policy.b = [0,0,0,0,0,0,0,0,0,0,0]
     output = opt.optimizePolicy(1)
+    print("Outputs")
     opt.printOptOutput(output)
+#optimize on all else
+#setting bounds
+p1_b = output[0][1][1]
+new_pol = output[0][1]
+bounds_all_but_p1 = [[-10,10],[p1_b,p1_b],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10]]
+opt.b_bounds = bounds_all_but_p1
+if True:
+    print(" ")
+    print(" ")
+    print("Optimizing Policy on all but parameter 1")
+    opt.Policy.b = new_pol
+    opt.setPolicy(opt.Policy)
+    output = opt.optimizePolicy(1)
+    print("Outputs")
+    opt.printOptOutput(output)
+#optimize on param 1 again
+#setting bounds
+p0_b = output[0][1][0]
+p2_b = output[0][1][2]
+p3_b = output[0][1][3]
+p4_b = output[0][1][4]
+new_pol = output[0][1]
+bounds_p1_only = [[p0_b,p0_b],[-10,10],[p2_b,p2_b],[p3_b,p3_b],[p4_b,p4_b],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+opt.b_bounds = bounds_p1_only
+if True:
+    print(" ")
+    print(" ")
+    print("Optimizing Policy on just param 1 again")
+    opt.Policy.b = new_pol
+    opt.setPolicy(opt.Policy)
+    output = opt.optimizePolicy(1)
+    print("Outputs")
+    opt.printOptOutput(output)
+
     
-#Optimizing with average prob
+#and now, try it all from the very beginning, with no enforcement
 if True:
-
     print(" ")
     print(" ")
-    print("Optimizing Policy using average-prob calculations")
-    opt.USE_AVE_PROB = True
+    print("Optimizing Policy clean, from a new coin-toss policy")
     opt.Policy.b = [0,0,0,0,0,0,0,0,0,0,0]
+    opt.b_bounds = [[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10],[-10,10]]
+    opt.setPolicy(opt.Policy)
     output = opt.optimizePolicy(1)
+    print("Outputs")
     opt.printOptOutput(output)
+

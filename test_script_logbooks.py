@@ -1,6 +1,6 @@
-from FireGirl_Landscape_Logbook import *
+from FireGirlPathwayLogbook import *
 
-item1 = FireGirl_Landscape_Logbook_Item()
+item1 = FireGirlPathwayLogbookItem()
 item1.setAll(1, 2, [3,4], 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
 #item1.printAll()
 item1.setAll(100, [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [])
@@ -10,10 +10,10 @@ item1.setAll(None, None, None, None, None,None,None,None,None,None,None,None,Non
 
 
 
-#item2 = FireGirl_Landscape_Logbook_Item()
+#item2 = FireGirl_Pathway_Logbook_Item()
 #item2.setAll(100, 200, [300,400], 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000)
 
-lb = FireGirl_Landscape_Logbook()
+lb = FireGirlPathwayLogbook()
 lb.updateYear(2015, 2, [3,4], 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
             #print(len(lb.log_list))
             #lb.updateYear(2015, -1111, [3,4], 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)

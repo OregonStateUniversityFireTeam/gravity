@@ -1,16 +1,16 @@
-from FireGirl_Optimizer import *
+from FireGirlOptimizer import *
 import random
 
 random.seed(0)
 
-#create landscapes
-landscapes = []
+#create pathways
+pathways = []
 for l in range(100):
-    landscapes.append(FireGirlLandscape(l))
+    pathways.append(FireGirlPathway(l))
 
 
 #create ignitions
-for ls in landscapes:
+for ls in pathways:
     for i in range(15):
         ign = FireGirlIgnitionRecord()
         f1 = random.randint(-100,100)
@@ -48,7 +48,7 @@ for ls in landscapes:
                 
 #create optimizer
 opt = FireGirlPolicyOptimizer()
-opt.landscape_set = landscapes
+opt.pathway_set = pathways
 
 objfn1 = opt.calcObjFn()
 fprm1 = opt.calcObjFPrime()
@@ -57,8 +57,8 @@ fprm1 = opt.calcObjFPrime()
 print("Initial Values")
 print("Obj Fn: " + str(objfn1))
 print("Fprime: " + str(fprm1))
-#print("net values: " + str(opt.landscape_net_values))
-#print("weights : " + str(opt.landscape_weights))
+#print("net values: " + str(opt.pathway_net_values))
+#print("weights : " + str(opt.pathway_weights))
 
 #Optimizing
 if True:

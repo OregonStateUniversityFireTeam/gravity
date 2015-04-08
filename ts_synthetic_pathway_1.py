@@ -1,13 +1,13 @@
-from FireGirl_Optimizer import *
-#from FireGirl_Landscape import *
-#from FireGirl_Policy import *
-#from FireGirl_Landscape_Logbook import *
+from FireGirlOptimizer import *
+#from FireGirlPathway import *
+#from FireGirlPolicy import *
+#from FireGirlPathwayLogbook import *
 
 #without initializing a policy, these will each have an all-zero (coin-toss) policy
-ls0 = FireGirlLandscape(0)
-ls1 = FireGirlLandscape(1)
-ls2 = FireGirlLandscape(2)
-ls3 = FireGirlLandscape(3)
+ls0 = FireGirlPathway(0)
+ls1 = FireGirlPathway(1)
+ls2 = FireGirlPathway(2)
+ls3 = FireGirlPathway(3)
 
 
 #setting ignition records manually
@@ -42,7 +42,7 @@ ig2b.year = 1
 
 
 
-#setting landscape results manually
+#setting pathway results manually
 # LS0 : +Suppress+ -Suppress- : Value = 0
 # LS1 : -Let-Burn- -Suppress- : Value = -100
 # LS2 : +Suppress+ +Let-Burn+ : Value = 100
@@ -72,13 +72,13 @@ ls3.net_value = 0
 
 
 
-#Add landscapes to a new Optimizer object
+#Add pathways to a new Optimizer object
 
 opt = FireGirlPolicyOptimizer()
-opt.landscape_set.append(ls0)
-opt.landscape_set.append(ls1)
-opt.landscape_set.append(ls2)
-opt.landscape_set.append(ls3)
+opt.pathway_set.append(ls0)
+opt.pathway_set.append(ls1)
+opt.pathway_set.append(ls2)
+opt.pathway_set.append(ls3)
 
 objfn1 = opt.calcObjFn()
 fprm1 = opt.calcObjFPrime()
@@ -86,8 +86,8 @@ fprm1 = opt.calcObjFPrime()
 #Printing initial values
 print("Obj Fn: " + str(objfn1))
 print("Fprime: " + str(fprm1))
-print("net values: " + str(opt.landscape_net_values))
-print("weights : " + str(opt.landscape_weights))
+print("net values: " + str(opt.pathway_net_values))
+print("weights : " + str(opt.pathway_weights))
 
 #Trying it with my known, best policy
 print(" ")
@@ -100,8 +100,8 @@ fprm2 = opt.calcObjFPrime()
 #Printing initial values
 print("Obj Fn: " + str(objfn2))
 print("Fprime: " + str(fprm2))
-print("net values: " + str(opt.landscape_net_values))
-print("weights : " + str(opt.landscape_weights))
+print("net values: " + str(opt.pathway_net_values))
+print("weights : " + str(opt.pathway_weights))
 
 
 #Trying it with my known, best policy
@@ -115,8 +115,8 @@ fprm2 = opt.calcObjFPrime()
 #Printing initial values
 print("Obj Fn: " + str(objfn2))
 print("Fprime: " + str(fprm2))
-print("net values: " + str(opt.landscape_net_values))
-print("weights : " + str(opt.landscape_weights))
+print("net values: " + str(opt.pathway_net_values))
+print("weights : " + str(opt.pathway_weights))
 
 
 #Optimizing

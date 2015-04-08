@@ -1,4 +1,4 @@
-from FireGirl_Optimizer import *
+from FireGirlOptimizer import *
 
 myOptim = FireGirlPolicyOptimizer()
 
@@ -7,33 +7,33 @@ myOptim = FireGirlPolicyOptimizer()
 #print(myOptim.b_bounds)
 #print(" ")
 
-#testing landscape creation
-print("Testing Landscape Creation")
-#def createNewDataSet(self, landscape_count, years_per_landscape, policy=None):
-myOptim.createFireGirlLandscapes(10, 20)
-print("landscapes created: " + str(len(myOptim.landscape_set)) + " out of 10")
+#testing pathway creation
+print("Testing Pathway Creation")
+#def createNewDataSet(self, pathway_count, years_per_pathway, policy=None):
+myOptim.createFireGirlPathways(10, 20)
+print("Pathways created: " + str(len(myOptim.pathway_set)) + " out of 10")
 for ls in range(10):
-    print("  landscape " + str(ls) + " has " + str(myOptim.landscape_set[ls].getIgnitionCount()) + " logbook entries.")
+    print("  pathway " + str(ls) + " has " + str(myOptim.pathway_set[ls].getIgnitionCount()) + " logbook entries.")
 print(" ")
 
 
 #DOING YEARS!!!
 
-#sumLandscapeValues()
-print("Testing sumLandscapeValues")
-myOptim.sumLandscapeValues()
-print(" landscape values:")
-for v in range(len(myOptim.landscape_net_values)):
-    print(" ls " + str(v) + ": " + str(myOptim.landscape_net_values[v]))
+#sumPathwayValues()
+print("Testing sumPathwayValues")
+myOptim.sumPathwayValues()
+print(" pathway values:")
+for v in range(len(myOptim.pathway_net_values)):
+    print(" ls " + str(v) + ": " + str(myOptim.pathway_net_values[v]))
 print( " " )
 
 
-#calcLandscapeWeights()
-print("Testing calcLandscapeWeights")
-myOptim.calcLandscapeWeights()
-print(" landscape weights:")
-for w in range(len(myOptim.landscape_weights)):
-    print(" ls " + str(w) + ": " + str(myOptim.landscape_weights[w]))
+#calcpathwayWeights()
+print("Testing calcPathwayWeights")
+myOptim.calcPathwayWeights()
+print(" pathway weights:")
+for w in range(len(myOptim.pathway_weights)):
+    print(" ls " + str(w) + ": " + str(myOptim.pathway_weights[w]))
 print( " " )
 
 #calcObjectiveFn
