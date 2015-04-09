@@ -19,13 +19,15 @@ print(" ")
 
 #DOING YEARS!!!
 
-#sumPathwayValues()
-print("Testing sumPathwayValues")
-myOptim.sumPathwayValues()
-print(" pathway values:")
-for v in range(len(myOptim.pathway_net_values)):
-    print(" ls " + str(v) + ": " + str(myOptim.pathway_net_values[v]))
-print( " " )
+#DEPRECATED
+if False:
+    #sumPathwayValues()
+    print("Testing sumPathwayValues")
+    myOptim.sumPathwayValues()
+    print(" pathway values:")
+    for v in range(len(myOptim.pathway_net_values)):
+        print(" ls " + str(v) + ": " + str(myOptim.pathway_net_values[v]))
+    print( " " )
 
 
 #calcpathwayWeights()

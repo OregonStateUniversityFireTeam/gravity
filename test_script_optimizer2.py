@@ -2,7 +2,7 @@ from FireGirlOptimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
 ###To create, uncomment the following two lines:
-FGPO.createFireGirlPathways(100,50)
+FGPO.createFireGirlPathways(10,50)
 #FGPO.saveFireGirlPathways("FG_pathways_20x50.fgl")
 
 ###To load (already created data), uncomment the following line

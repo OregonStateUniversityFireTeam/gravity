@@ -143,7 +143,7 @@ class FireGirlPathwayLogbook:
         #if the year wasn't found in the logbook, create and add a new item
         if year_found == False:
             #new logbook item
-            item = FireGirl_Pathway_Logbook_Item(year, date, loc, temp, wind, timber, timber_ave8, timber_ave24, 
+            item = FireGirlPathwayLogbookItem(year, date, loc, temp, wind, timber, timber_ave8, timber_ave24, 
                                                    fuel, fuel_ave8, fuel_ave24, suppress_prob, suppress_decision,
                                                     cells_burned, timber_lost, logging_total, eco1, eco2, eco3)
             #add item to the list

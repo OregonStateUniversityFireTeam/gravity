@@ -96,7 +96,7 @@ class FireGirlPathway:
             #  timber_value that is lost, or not, by the blaze.
                     
             #The Logbook object allows this pathway to record its yearly history
-            self.Logbook = FireGirl_Pathway_Logbook()
+            self.Logbook = FireGirlPathwayLogbook()
 
             #Starting a list to hold FireGirl_FireLog objects. Each one holds a full 
             #  record of one fire, including the cells that burn, when they burn, and 
@@ -748,7 +748,7 @@ class FireGirlPathway:
         reach = self.fire_param_reach
         
         #starting a new firelog to keep track of what happens.
-        fire_log_item = FireGirl_FireLog(self.year)
+        fire_log_item = FireGirlFireLog(self.year)
         
         
         end_time = self.drawEndOfFire()
@@ -856,7 +856,7 @@ class FireGirlPathway:
             
             
             #recording information in the Logbook item
-            #function signature is:  FireGirl_fireLog.addIgnitionEvent(time, location, spread_rate, crown_burned):
+            #function signature is:  FireGirlfireLog.addIgnitionEvent(time, location, spread_rate, crown_burned):
             fire_log_item.addIgnitionEvent(current_time, [xloc,yloc], spreadrate, crown_burned[xloc][yloc]) 
             
             
