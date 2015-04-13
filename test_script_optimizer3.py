@@ -1,8 +1,8 @@
 from FireGirlOptimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
-pathway_count = 20
-iginition_count = 50
+pathway_count = 10
+iginition_count = 10
 
 
 #setting new policy

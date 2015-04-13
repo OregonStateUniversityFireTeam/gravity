@@ -154,6 +154,50 @@ class FireGirlPolicyOptimizer:
         
         return obj_fn_val
 
+    def FP_delta_prob(self, beta, pw, ign):
+        #this function calculates the inner "delta_prob" value for each calculation of the derivitive.
+        # caclObjFPrime() loops over it repeatedly, and passes in which parameter (beta), pathway (pw) and
+        # ignition (ign) to calculate value, which is then summed in caclObjFPrime()
+        
+        
+        #making a function handle for ease within the loop
+        spare_pol = FireGirlPolicy()
+        logistic = spare_pol.logistic
+        
+        #NOTE: the individual pathways have already had their policies updated
+        #  to the current one in self.calcPathwayWeights()
+
+        #get the suppression choice of this pathway at this ignition
+        choice = self.pathway_set[pw].getChoice(ign)
+        #and set it to binary
+        sup = 0
+        if choice == True: sup = 1
+
+        #get the new probability (according to the current policy) of suppressing
+        # this ignition in this pathway
+        prob_pol = self.pathway_set[pw].getProb(ign)
+
+        #set the probability of actually doing what we did
+        prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
+
+        #checking for unreasonably small probabilities
+        if prob == 0:
+            prob = 0.00001
+
+        #get the cross product of this pathway at this ignition
+        cross_product = self.pathway_set[pw].getCrossProduct(ign)
+
+        #get the feature of this pathway and this ignition for this beta
+        flik = self.pathway_set[pw].getFeature(ign, beta)
+
+
+        delta_lgstc = flik * logistic(cross_product) * (1.0 - logistic(cross_product))
+
+        delta_prob = sup * delta_lgstc + (1 - sup)*(-1)*delta_lgstc
+        
+        return delta_prob
+
+        
     def calcObjFPrime(self, betas=None):
         #This function returns the gradient of the objective function
 
@@ -209,36 +253,8 @@ class FireGirlPolicyOptimizer:
 
                 for i in range(self.pathway_set[pw].getIgnitionCount()):
 
-                    #NOTE: the individual pathways have already had their policies updated
-                    #  to the current one in self.calcPathwayWeights()
-
-                    #get the suppression choice of this pathway at this ignition
-                    choice = self.pathway_set[pw].getChoice(i)
-                    #and set it to binary
-                    sup = 0
-                    if choice == True: sup = 1
-
-                    #get the new probability (according to the current policy) of suppressing
-                    # this ignition in this pathway
-                    prob_pol = self.pathway_set[pw].getProb(i)
-
-                    #set the probability of actually doing what we did
-                    prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
-
-                    #checking for unreasonably small probabilities
-                    if prob == 0:
-                        prob = 0.00001
-
-                    #get the cross product of this pathway at this ignition
-                    cross_product = self.pathway_set[pw].getCrossProduct(i)
-
-                    #get the feature of this pathway and this ignition for this beta
-                    flik = self.pathway_set[pw].getFeature(i, beta)
-
-
-                    delta_lgstc = flik * logistic(cross_product) * (1.0 - logistic(cross_product))
-
-                    delta_prob = sup * delta_lgstc + (1 - sup)*(-1)*delta_lgstc
+                     
+                    delta_prob = self.FP_delta_prob(beta, pw, i)
                     
                     if self.USE_AVE_PROB == False:
                         sum_delta_prob += delta_prob / prob
@@ -362,13 +378,13 @@ class FireGirlPolicyOptimizer:
         obj_vals = output[1]
         
         print("         ObjFn Val,     Params.....")
-        print("                        CONS   date   date2    temp   wind   timb   timb8  timb24  fuel   fuel8   fuel24")
+        print("                        CONS   date    date2    temp   wind   timb   timb8  timb24  fuel  fuel8  fuel24")
         for v in range(len(obj_vals)):
             if v == 0:
                 print("before: "),
             else:
                 print("after:  "),
-            print(str(round(obj_vals[v],2)) + "   "),
+            print(str(round(obj_vals[v],2)) + "  "),
             
             for p in range(len(params[v])):
                 print(" " + str(round(params[v][p],3))),
