@@ -361,10 +361,14 @@ class FireGirlPolicyOptimizer:
         params = output[0]
         obj_vals = output[1]
         
-        print("ObjFn Val,     Params.....")
-        
+        print("         ObjFn Val,     Params.....")
+        print("                        CONS   date   date2    temp   wind   timb   timb8  timb24  fuel   fuel8   fuel24")
         for v in range(len(obj_vals)):
-            print(str(round(obj_vals[v],2)) + "     "),
+            if v == 0:
+                print("before: "),
+            else:
+                print("after:  "),
+            print(str(round(obj_vals[v],2)) + "   "),
             
             for p in range(len(params[v])):
                 print(" " + str(round(params[v][p],3))),

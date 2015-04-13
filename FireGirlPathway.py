@@ -196,8 +196,8 @@ class FireGirlPathway:
             self.fire_suppression_rate = 0.5
 
             #how much does it cost to suppress a fire?
-            self.fire_suppression_cost_per_cell = 1000
-            self.fire_suppression_cost_per_day = 5000
+            self.fire_suppression_cost_per_cell = 10
+            self.fire_suppression_cost_per_day = 50
 
 
 

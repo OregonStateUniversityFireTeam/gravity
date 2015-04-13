@@ -1,0 +1,107 @@
+4-13-15
+REPORTS GENERATED from test_script_optimzer3.py
+
+Generating sets of 20 pathways with 50 ignitions each, three times in a row. The policies are generated
+with the average-probability method. The second and third set of pathways are generated using the 
+optimal policy generated from the previous set. Notice in the third set, paramter four flips sign.
+
+In this first test, suppression costs in this test were 1000/cell and 5000/day and seem to favor let-burn
+policies (those with most/all negative coefficients)
+
+_____________________________________________________________________________________________________________
+Generating Initial Set of Pathways
+Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+
+Beginning Optimization Routine 1
+         ObjFn Val,     Params.....
+                          CONS   date   date2    temp    wind    timb   timb8  timb24   fuel   fuel8  fuel24
+Before:  4832867.85       0.0    0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.0    0.0     0.0
+After:   4533692.14       -0.19 -0.205  -0.145  -0.225  -0.168  -0.179  -0.217  -0.208 -0.182 -0.198  -0.182
+_____________________________________________________________________________________________________________
+Generating new pathways using the new policy:
+Creating pathway  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+
+Beginning Optimization Routine 2
+         ObjFn Val,     Params.....
+                          CONS    date   date2    temp    wind    timb   timb8  timb24   fuel   fuel8  fuel24
+Before:  -4483673.26     -0.19  -0.205  -0.145  -0.225  -0.168  -0.179  -0.217  -0.208 -0.182  -0.198  -0.182
+After:   -4485997.76     -0.495  -0.52  -0.585  -0.746  -0.492  -0.849  -0.654  -0.53  -0.617  -0.511  -0.316
+_____________________________________________________________________________________________________________
+Generating new pathways using the second new policy:
+Creating pathway  40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+
+Beginning Optimization Routine 3
+         ObjFn Val,     Params.....
+                          CONS    date   date2    temp    wind    timb   timb8  timb24   fuel   fuel8  fuel24
+Before:  -4662780.75    -0.495  -0.52   -0.585  -0.746  -0.492  -0.849  -0.654  -0.53  -0.617  -0.511  -0.316
+After:   -4665815.21    -3.664  -3.681  -3.724   2.837  -3.662  -3.9    -3.77   -3.688 -3.745  -3.675  -3.545
+_____________________________________________________________________________________________________________
+
+
+
+
+Now the suppression costs are reduced 10-fold, and all else is left the same:
+The policy seems to have stabalized pretty well, but is still mostly let-burn
+
+_____________________________________________________________________________________________________________
+Generating Initial Set of Pathways
+Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+Beginning Optimization Routine 1
+         ObjFn Val,     Params.....
+                        CONS   date    date2    temp    wind   timb   timb8  timb24   fuel   fuel8  fuel24
+before:   -1402150.58   0.0    0.0     0.0      0.0    0.0     0.0     0.0     0.0     0.0     0.0    0.0
+after:    -1500519.91  -0.544  -0.409  -0.586  -10.0  -0.885  -0.318  -0.603  -2.206  -3.712  -3.695 -4.754
+_____________________________________________________________________________________________________________
+Generating new pathways using the new policy:
+Creating pathway  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+
+Beginning Optimization Routine 2
+         ObjFn Val,     Params.....
+                        CONS    date   date2    temp    wind    timb   timb8  timb24   fuel   fuel8  fuel24
+before:   -4603144.53   -0.544 -0.409  -0.586  -10.0  -0.885 -0.318  -0.603  -2.206  -3.712  -3.695 -4.754
+after:    -4604312.37   -0.54  -0.405  -0.582  -10.0  -0.88  -0.314  -0.599  -2.201  -3.706  -3.69  -4.748
+_____________________________________________________________________________________________________________
+Generating new pathways using the second new policy:
+Creating pathway  40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+
+Beginning Optimization Routine 3
+         ObjFn Val,     Params.....
+                        CONS    date   date2   temp   wind    timb   timb8  timb24   fuel   fuel8  fuel24
+before:   -4764735.9   -0.54  -0.405  -0.582  -10.0  -0.88  -0.314  -0.599  -2.201  -3.706  -3.69  -4.748
+after:    -4764941.7   -0.536 -0.402  -0.578  -10.0  -0.876 -0.311  -0.596  -2.197  -3.702  -3.685 -4.743
+_____________________________________________________________________________________________________________
+
+
+
+
+Once again, suppression costs are reduced another 10-fold, to 10/cell and 50/day:
+Now we're seeing a mixed policy with suppression on date, windspeed, and timber value in the 8 surrounding cells
+_____________________________________________________________________________________________________________
+Generating Initial Set of Pathways
+Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+
+Beginning Optimization Routine 1
+         ObjFn Val,     Params.....
+                        CONS   date   date2    temp   wind   timb   timb8  timb24  fuel  fuel8   fuel24
+before:  -2025652.43    0.0    0.0     0.0     0.0    0.0    0.0    0.0     0.0    0.0    0.0     0.0
+after:   -2109356.86   -0.16  -0.079  -0.063  -1.068  0.165  0.256  0.049  -0.161 -0.623 -0.726  -0.665
+_____________________________________________________________________________________________________________
+Generating new pathways using the new policy:
+Creating pathway  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+
+Beginning Optimization Routine 2
+         ObjFn Val,     Params.....
+                        CONS   date   date2    temp   wind   timb   timb8  timb24  fuel    fuel8   fuel24
+before:  -4721983.41   -0.16  -0.079  -0.063  -1.068  0.165  0.256  0.049  -0.161  -0.623  -0.726 -0.665
+after:   -4727590.1     0.056  2.608  -0.292  -3.888  0.707  -0.891  3.938  -0.47  -0.406  -3.7   -4.782
+_____________________________________________________________________________________________________________
+Generating new pathways using the second new policy:
+Creating pathway  40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+
+Beginning Optimization Routine 3
+         ObjFn Val,     Params.....
+                        CONS   date   date2    temp   wind   timb   timb8  timb24  fuel   fuel8   fuel24
+before:  -4874560.95    0.056  2.608  -0.292  -3.888  0.707  -0.891  3.938  -0.47  -0.406  -3.7  -4.782
+after:   -4874560.95    0.056  2.608  -0.292  -3.888  0.707  -0.891  3.938  -0.47  -0.406  -3.7  -4.782
+
+
