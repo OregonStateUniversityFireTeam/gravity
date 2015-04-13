@@ -253,13 +253,20 @@ class FireGirlPolicyOptimizer:
 
                 for i in range(self.pathway_set[pw].getIgnitionCount()):
 
-                     
+                    #set the probability of actually doing what we did
+                    prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
+
+                    #checking for unreasonably small probabilities
+                    if prob == 0:
+                        prob = 0.00001
+
+
                     delta_prob = self.FP_delta_prob(beta, pw, i)
                     
-                    if self.USE_AVE_PROB == False:
-                        sum_delta_prob += delta_prob / prob
-                    else:
+                    if self.USE_AVE_PROB:
                         sum_delta_prob += delta_prob
+                    else:
+                        sum_delta_prob += delta_prob / prob
 
                 
                 #finished adding up sum_delta_prob for all the ignitions in this pathway, so
