@@ -272,11 +272,11 @@ class FireGirlPolicyOptimizer:
                 #finished adding up sum_delta_prob for all the ignitions in this pathway, so
                 # calculate the d/dx value:
                 
-                if self.USE_AVE_PROB == False:
-                    d_obj_d_bk[beta] += self.pathway_net_values[pw] * self.pathway_weights[pw] * sum_delta_prob
-                else:
+                if self.USE_AVE_PROB:
                     invI = (1.0 / self.pathway_set[pw].getIgnitionCount())
                     d_obj_d_bk[beta] += self.pathway_net_values[pw] * invI * sum_delta_prob
+                else:
+                    d_obj_d_bk[beta] += self.pathway_net_values[pw] * self.pathway_weights[pw] * sum_delta_prob
                     
                     
 
