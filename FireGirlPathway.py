@@ -722,7 +722,7 @@ class FireGirlPathway:
         self.net_value = 0
 
         #add/subtract up the various components
-        self.net_value = self.getHarvestTotal() - self.getSuppressionTotal() - self.getTimberLossTotal()
+        self.net_value = self.getHarvestTotal() - self.getSuppressionTotal()# - self.getTimberLossTotal()
 
         #the value is already assigned to the local variable, but also return it:
         return self.net_value
@@ -783,7 +783,7 @@ class FireGirlPathway:
             #failsafe exit
             iter_count += 1
             if iter_count > iter_cap:
-                print("ERROR: Priority queue has failed to exit.  Current_time is: " + str(current_time))
+                print("WARNING: Firespread priority queue has failed to exit.  Current_time is: " + str( round(current_time,3) )    )
                 break
                 
             #check to make sure that there is at least one queued arrival

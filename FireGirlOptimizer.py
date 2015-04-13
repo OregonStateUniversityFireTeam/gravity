@@ -40,10 +40,10 @@ class FireGirlPolicyOptimizer:
 
         if USING_FIREGIRL_PATHWAYS == True:
             #FireGirl uses 11 parameters, so set them all to 0 (coin-toss policy)
-            self.Policy = FireGirlPolicy(None,0,11)
+            self.Policy = FireGirlPolicy(None,0.0,11)
         else:
             #FireWoman uses ??? parametres, so set them all to 0 (coin-toss policy)
-            self.Policy = FireGirlPolicy(None,0,30)
+            self.Policy = FireGirlPolicy(None,0.0,30)
 
 
         ##########################################################################################
@@ -315,6 +315,7 @@ class FireGirlPolicyOptimizer:
             #converting to numpy arrays
             x0 = scipy.array(self.Policy.b)
 
+
             #               arg names:    func            x0  fprime,               args, approx_grad, bounds
             output_policy = fmin_l_bfgs_b(self.calcObjFn, x0, self.calcObjFPrime,   [],   False,       self.b_bounds)
             
@@ -333,8 +334,18 @@ class FireGirlPolicyOptimizer:
             #record the final objective function value
             obj_vals.append(output_policy[1])
             
+            
+          
             #take the new parameter set and assign them back to the policy
-            self.Policy.b = output_policy[0]
+            for i in range(len(output_policy[0])):
+                self.Policy.b[i] = output_policy[0][i] + 1.0 - 1.0
+
+            #self.Policy.b = output_policy[0]
+            
+            #debugging check
+            #print("output policy is: " + str(output_policy[0]))
+            #print("after assigning it to self.Policy.b, ...b is: ")
+            #print(str(self.Policy.b))
             
             #run the next iteration
             
@@ -366,7 +377,7 @@ class FireGirlPolicyOptimizer:
     ###############################
     # FireGirl-specific Functions #
     ###############################
-    def createFireGirlPathways(self, pathway_count, years, policy=None):
+    def createFireGirlPathways(self, pathway_count, years, start_at_ID=0, policy=None):
         #This function creates a new set of FireGirl-style pathways (deleting all current
         #    pathway data)
         
@@ -375,29 +386,33 @@ class FireGirlPolicyOptimizer:
             #no policy passed, so create a new one
             self.Policy = FireGirlPolicy(None,0,11)
         else:
-            #one was passed, so set it.
+            #one was passed, so set it to the current one.
             self.Policy = policy
         
         #Clear the pathway_set list in case there's old pathways in it
         self.pathway_set = []
         
         #Create new pathways and add them to the pathway_set list
-        for i in range(pathway_count):
-            self.pathway_set.append(FireGirlPathway(i, self.Policy))
+        for i in range(start_at_ID, start_at_ID + pathway_count):
+            self.pathway_set.append(FireGirlPathway(i, policy))
         
         #Have each pathway create new data for itself. Right now their timber_values 
         #   and fuel_loads are set uniformally to zero
-        for ls in self.pathway_set:
+        print("Creating pathway "),  #the comma indicates to python not to end the line
+        for pw in self.pathway_set:
 
             #have each pathway create timber/fuel data for itself
-            print("Creating pathway " + str(ls.ID_number))
-            ls.generateNewPathway()
+            print(str(pw.ID_number) + ","), #the comma indicates to python not to end the line
+            pw.generateNewPathway()
 
             #Have each pathway simulate for the given number of years
-            ls.doYears(years)
+            pw.doYears(years)
 
             #and after all years are finished, have each pathway calculate its net value
-            ls.updateNetValue()
+            pw.updateNetValue()
+        
+        #end the print line
+        print(" ")
         
         #DEPRECATED
         #Finish up by calculating the final values of each pathway
