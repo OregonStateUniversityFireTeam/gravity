@@ -27,6 +27,6 @@ print(" ")
 
 ###To Optimize, uncomment the following
 print("Beginning Optimization Routine")
-FGPO.USE_AVE_PROB = False
+FGPO.USE_AVE_PROB = True
 output=FGPO.optimizePolicy()
 FGPO.printOptOutput(output)

@@ -1,8 +1,8 @@
 from FireGirlOptimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
-pathway_count = 10
-iginition_count = 10
+pathway_count = 20
+iginition_count = 50
 
 
 #setting new policy
@@ -39,7 +39,8 @@ print("  ")
 print("Generating new pathways using the new policy:")
 #print("Policy parameters are: ")
 #print(str(FGPO.Policy.b))
-FGPO.createFireGirlPathways(pathway_count,iginition_count,pathway_count,FGPO.Policy)
+#FGPO.createFireGirlPathways(pathway_count,iginition_count,pathway_count,FGPO.Policy)
+FGPO.createFireGirlPathways(pathway_count,iginition_count,0,FGPO.Policy)
 print(" ")
 
 print("Beginning Optimization Routine 2")
@@ -59,7 +60,8 @@ print("  ")
 print("Generating new pathways using the second new policy:")
 #print("Policy parameters are: ")
 #print(str(FGPO.Policy.b))
-FGPO.createFireGirlPathways(pathway_count,iginition_count,pathway_count*2,FGPO.Policy)
+#FGPO.createFireGirlPathways(pathway_count,iginition_count,pathway_count*2,FGPO.Policy)
+FGPO.createFireGirlPathways(pathway_count,iginition_count,0,FGPO.Policy)
 print(" ")
 
 print("Beginning Optimization Routine 3")

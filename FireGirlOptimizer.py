@@ -154,16 +154,9 @@ class FireGirlPolicyOptimizer:
         
         return obj_fn_val
 
-    def FP_delta_prob(self, beta, pw, ign):
-        #this function calculates the inner "delta_prob" value for each calculation of the derivitive.
-        # caclObjFPrime() loops over it repeatedly, and passes in which parameter (beta), pathway (pw) and
-        # ignition (ign) to calculate value, which is then summed in caclObjFPrime()
-        
-        
-        #making a function handle for ease within the loop
-        spare_pol = FireGirlPolicy()
-        logistic = spare_pol.logistic
-        
+    def FP_prob(self, pw, ign):
+        #return the probability that the current policy predicts for a specific ignition of a specific pathway
+       
         #NOTE: the individual pathways have already had their policies updated
         #  to the current one in self.calcPathwayWeights()
 
@@ -178,12 +171,25 @@ class FireGirlPolicyOptimizer:
         prob_pol = self.pathway_set[pw].getProb(ign)
 
         #set the probability of actually doing what we did
-        prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
-
+        prob = sup * prob_pol   +   (1-sup)*(1-prob_pol) 
+        
         #checking for unreasonably small probabilities
         if prob == 0:
             prob = 0.00001
 
+        return prob
+        
+    def FP_delta_prob(self, beta, pw, ign, prob):
+        #this function calculates the inner "delta_prob" value for each calculation of the derivitive.
+        # caclObjFPrime() loops over it repeatedly, and passes in which parameter (beta), pathway (pw) and
+        # ignition (ign) to calculate value, which is then summed in caclObjFPrime()
+        
+        #get the suppression choice of this pathway at this ignition
+        choice = self.pathway_set[pw].getChoice(ign)
+        #and set it to binary
+        sup = 0
+        if choice == True: sup = 1
+        
         #get the cross product of this pathway at this ignition
         cross_product = self.pathway_set[pw].getCrossProduct(ign)
 
@@ -191,7 +197,7 @@ class FireGirlPolicyOptimizer:
         flik = self.pathway_set[pw].getFeature(ign, beta)
 
 
-        delta_lgstc = flik * logistic(cross_product) * (1.0 - logistic(cross_product))
+        delta_lgstc = flik * self.Policy.logistic(cross_product) * (1.0 - self.Policy.logistic(cross_product))
 
         delta_prob = sup * delta_lgstc + (1 - sup)*(-1)*delta_lgstc
         
@@ -233,10 +239,6 @@ class FireGirlPolicyOptimizer:
         #get the weight (total or ave) for each pathway decision sequence using the 
         #   current policy (which is possibly being varied by l_bfgs, etc...)
         self.calcPathwayWeights()
-
-        #making a function handle for ease within the loop
-        spare_pol = FireGirlPolicy()
-        logistic = spare_pol.logistic
         
         #iterate over each beta and evaluate the gradient along it
         for beta in range(len(b)):
@@ -251,17 +253,13 @@ class FireGirlPolicyOptimizer:
                 #reset value for this pathway
                 sum_delta_prob = 0
 
-                for i in range(self.pathway_set[pw].getIgnitionCount()):
+                for ign in range(self.pathway_set[pw].getIgnitionCount()):
 
-                    #set the probability of actually doing what we did
-                    prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
+                    #compute both the current policy's probability at this ignition
+                    prob = self.FP_prob(pw, ign)
 
-                    #checking for unreasonably small probabilities
-                    if prob == 0:
-                        prob = 0.00001
+                    delta_prob = self.FP_delta_prob(beta, pw, ign, prob)
 
-
-                    delta_prob = self.FP_delta_prob(beta, pw, i)
                     
                     if self.USE_AVE_PROB:
                         sum_delta_prob += delta_prob

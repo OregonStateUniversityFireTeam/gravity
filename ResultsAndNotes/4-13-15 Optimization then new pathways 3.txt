@@ -1,0 +1,47 @@
+4-13-15
+RESULTS GENERATED FROM test_script_optimzer3.py
+
+Here, I regenerated the same set of 20pathway x 50ignitions except I regenerated them with the updated policies.
+Note that the third one is still stable, just like in the other tests today. Also note the objective functions 
+respond in the same way as they did when separate pathway sets were used. It's not just an artifact of using differing
+pathway sets.
+
+Finally, note that the fire in pathway 5 that burned too long does not do so in the 2nd and 3rd runs. The 
+new policy is apparently suppressing it.  In the same way, the fire in pathway 16, though still exceeding its
+time limit, burns for a smaller amount of time in the 2nd and 3rd runs, so it's clearly being suppressed, though
+apparently is "hot" enough to burn past its expiration anyway.
+
+
+_____________________________________________________________________________________________________________
+Generating Initial Set of Pathways
+Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+WARNING, pathway 5: Firespread priority queue has failed to exit.  Current_time is: 10.931
+WARNING, pathway 16: Firespread priority queue has failed to exit.  Current_time is: 16.296
+
+Beginning Optimization Routine 1
+         ObjFn Val,     Params.....
+                        CONS   date    date2    temp   wind   timb   timb8  timb24  fuel  fuel8  fuel24
+before:  -2025652.43    0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+after:   -2109356.86    -0.16  -0.079  -0.063  -1.068  0.165  0.256  0.049  -0.161  -0.623  -0.726  -0.665
+
+_____________________________________________________________________________________________________________
+Generating new pathways using the new policy:
+Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+WARNING, pathway 16: Firespread priority queue has failed to exit.  Current_time is: 9.752
+
+Beginning Optimization Routine 2
+         ObjFn Val,     Params.....
+                        CONS   date    date2    temp   wind   timb   timb8  timb24  fuel  fuel8  fuel24
+before:  -4184652.58    -0.16  -0.079  -0.063  -1.068  0.165  0.256  0.049  -0.161  -0.623  -0.726  -0.665
+after:   -4188627.36    -0.211  -0.054  -0.115  -2.055  0.745  1.205  -0.316  -1.435  -1.508  -0.82  -0.857
+
+_____________________________________________________________________________________________________________
+Generating new pathways using the second new policy:
+Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+WARNING, pathway 16: Firespread priority queue has failed to exit.  Current_time is: 9.752
+
+Beginning Optimization Routine 3
+         ObjFn Val,     Params.....
+                        CONS   date    date2    temp   wind   timb   timb8  timb24  fuel  fuel8  fuel24
+before:  -4192174.22    -0.211  -0.054  -0.115  -2.055  0.745  1.205  -0.316  -1.435  -1.508  -0.82  -0.857
+after:   -4192174.22    -0.211  -0.054  -0.115  -2.055  0.745  1.205  -0.316  -1.435  -1.508  -0.82  -0.857
