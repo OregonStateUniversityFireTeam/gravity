@@ -73,28 +73,28 @@ class FireGirlPolicyOptimizer:
         self.pathway_weights = []
 
         #iterating over each pathway and appending each new weigh to the list
-        for ls in self.pathway_set:
+        for pw in self.pathway_set:
 
             #setting the pathway's USE_LOG_PROB flag to match the optimizer's flag
-            ls.USE_LOG_PROB = self.USE_LOG_PROB
+            pw.USE_LOG_PROB = self.USE_LOG_PROB
         
             #setting this pathway's policy to the current one
-            if USE_SELF_POLICY == True:
-                ls.assignPolicy(self.Policy)
+            if USE_SELF_POLICY:
+                pw.assignPolicy(self.Policy)
             else:
                 #setting this to false indicates that the pathways have their own policies
                 # (possibly applied elsewhere) and that they should use them, instead of
                 # taking the optimizer's current policy. Mostly used for testing
                 pass
             
-            #ls.DEBUG = True
+            #pw.DEBUG = True
             p = 0.0
-            if self.USE_AVE_PROB == False:
-                p = ls.calcTotalProb()
-            #ls.DEBUG = False
-            else:
+            if self.USE_AVE_PROB:
                 #TESTING - USING Average Probability instead of total probability
-                p = ls.calcAveProb()
+                p = pw.calcAveProb()
+            #pw.DEBUG = False
+            else:
+                p = pw.calcTotalProb()
             
             self.pathway_weights.append(p)
 
@@ -133,15 +133,15 @@ class FireGirlPolicyOptimizer:
 
         #now assign them to the local list, for ease
         self.pathway_net_values = []
-        for ls in self.pathway_set:
-            self.pathway_net_values.append(ls.net_value)
+        for pw in self.pathway_set:
+            self.pathway_net_values.append(pw.net_value)
         
         #a variable to hold the sum of ALL the probability-weighted pathway values
         total_value = 0
         
         #loop over all the values/weights and sum them
-        for ls in range(len(self.pathway_set)):
-            total_value += self.pathway_net_values[ls] * self.pathway_weights[ls]
+        for pw in range(len(self.pathway_set)):
+            total_value += self.pathway_net_values[pw] * self.pathway_weights[pw]
         
 
 
@@ -202,25 +202,25 @@ class FireGirlPolicyOptimizer:
             #variable to hold the sum of the delta(prob)/prop values
             sum_delta_prob = 0
 
-            for l in range(len(self.pathway_set)):
+            for pw in range(len(self.pathway_set)):
 
                 #reset value for this pathway
                 sum_delta_prob = 0
 
-                for i in range(self.pathway_set[l].getIgnitionCount()):
+                for i in range(self.pathway_set[pw].getIgnitionCount()):
 
                     #NOTE: the individual pathways have already had their policies updated
                     #  to the current one in self.calcPathwayWeights()
 
                     #get the suppression choice of this pathway at this ignition
-                    choice = self.pathway_set[l].getChoice(i)
+                    choice = self.pathway_set[pw].getChoice(i)
                     #and set it to binary
                     sup = 0
                     if choice == True: sup = 1
 
                     #get the new probability (according to the current policy) of suppressing
                     # this ignition in this pathway
-                    prob_pol = self.pathway_set[l].getProb(i)
+                    prob_pol = self.pathway_set[pw].getProb(i)
 
                     #set the probability of actually doing what we did
                     prob = sup * prob_pol   +   (1-sup)*(1-prob_pol)
@@ -230,10 +230,10 @@ class FireGirlPolicyOptimizer:
                         prob = 0.00001
 
                     #get the cross product of this pathway at this ignition
-                    cross_product = self.pathway_set[l].getCrossProduct(i)
+                    cross_product = self.pathway_set[pw].getCrossProduct(i)
 
                     #get the feature of this pathway and this ignition for this beta
-                    flik = self.pathway_set[l].getFeature(i, beta)
+                    flik = self.pathway_set[pw].getFeature(i, beta)
 
 
                     delta_lgstc = flik * logistic(cross_product) * (1.0 - logistic(cross_product))
@@ -250,10 +250,10 @@ class FireGirlPolicyOptimizer:
                 # calculate the d/dx value:
                 
                 if self.USE_AVE_PROB == False:
-                    d_obj_d_bk[beta] += self.pathway_net_values[l] * self.pathway_weights[l] * sum_delta_prob
+                    d_obj_d_bk[beta] += self.pathway_net_values[pw] * self.pathway_weights[pw] * sum_delta_prob
                 else:
-                    invI = (1.0 / self.pathway_set[l].getIgnitionCount())
-                    d_obj_d_bk[beta] += self.pathway_net_values[l] * invI * sum_delta_prob
+                    invI = (1.0 / self.pathway_set[pw].getIgnitionCount())
+                    d_obj_d_bk[beta] += self.pathway_net_values[pw] * invI * sum_delta_prob
                     
                     
 
@@ -266,6 +266,7 @@ class FireGirlPolicyOptimizer:
         # because this is a minimization routine, and the objective function is being flipped, so too
         #should be the derivatives
         for b in range(len(d_obj_d_bk)):
+            #d_obj_d_bk[b] *= -1
             d_obj_d_bk[b] *= -1
 
 
