@@ -41,7 +41,7 @@ ________________________________________________________________________________
 
 
 Now the suppression costs are reduced 10-fold, and all else is left the same:
-The policy seems to have stabalized pretty well, but is still mostly let-burn
+The policy seems to stabalize pretty well, but is still mostly let-burn
 
 _____________________________________________________________________________________________________________
 Generating Initial Set of Pathways
@@ -75,7 +75,8 @@ ________________________________________________________________________________
 
 
 Once again, suppression costs are reduced another 10-fold, to 10/cell and 50/day:
-Now we're seeing a mixed policy with suppression on date, windspeed, and timber value in the 8 surrounding cells
+Now we're seeing a mixed policy with pro-suppression on date, windspeed, and timber value (from the 8 
+surrounding cells)
 _____________________________________________________________________________________________________________
 Generating Initial Set of Pathways
 Creating pathway  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
