@@ -87,5 +87,25 @@ for p in pert_pols:
     pert_pathways_objfn_total.append(FGPO.calcObjFn())
     FGPO.USE_AVE_PROB = True
     pert_pathways_objfn_ave.append(FGPO.calcObjFn())
+
     
-    
+### STEP 5 ######################################################
+#   Re-generate a new set of pathways using the optimal policy from step 3
+
+#set the current policy to the optimal policy again
+FGPO.Policy.b = pol_optim
+
+#generate a new set of pathways using this set
+FGPO.createFireGirlPathways(pathway_count,iginition_count)
+
+#record the objective function values
+FGPO.USE_AVE_PROB = False
+opt_pathway_objfn_total = FGPO.calcObjFn()
+FGPO.USE_AVE_PROB = True
+opt_pathway_objfn_ave = FGPO.calcObjFn()
+
+
+### STEP 6 ######################################################
+#  	Compare the objective function values of each of the pathways generated using perturbed policies to 
+#       the objective function values of the pathways generated under the optimal policy
+
