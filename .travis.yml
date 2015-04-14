@@ -14,6 +14,5 @@ before_install:
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
-  - python setup.py install
 script:
   - python specs/tc_optimizer.py
