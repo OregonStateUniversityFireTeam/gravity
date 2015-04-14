@@ -8,8 +8,6 @@ iginition_count = 50
 
 FGPO.createFireGirlPathways(pathway_count,iginition_count)
 
-beta = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-
 obj_fns_total = []
 obj_fns_total_pert = []
 obj_fns_ave = []
@@ -21,8 +19,9 @@ results = FGPO.optimizePolicy()
 
 #save those betas
 pol_optim = []
-for i in range(len(beta)):
-    pol_optim.append(beta[i] + 1.0 - 1.0)
+
+for i in range(len(FGPO.Policy.b)):
+    pol_optim.append(FGPO.Policy.b[i] + 1.0 - 1.0)
 
     
 #perturb the policy many times and record the changes
@@ -36,7 +35,7 @@ for i in range(1000):
     
     #perturb the optimal policy
     for j in range(11):
-        FGPO.Policy.b[j] = pol_optim[j] + random.uniform(-0.01,0.01)
+        FGPO.Policy.b[j] = pol_optim[j] + random.uniform(-0.1,0.1)
     
     #recalculate the objective functions
     FGPO.USE_AVE_PROB = False
