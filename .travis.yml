@@ -15,4 +15,4 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
 script:
-  - python specs/tc_optimizer.py
+  - python -m unittest discover --pattern=*tc_*.py
