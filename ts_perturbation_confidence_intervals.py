@@ -26,7 +26,7 @@ from FireGirlOptimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
 pathway_count = 20
-iginition_count = 100
+iginition_count = 20
 
 ### STEP 1 ######################################################
 #	Generate a set of pathways (100s) using a coin-toss policy
@@ -75,7 +75,13 @@ pert_pathways_objfn_total = []
 pert_pathways_objfn_ave = []
 
 #loop over each perturbed policy
+#This step takes the most time, since pathways have to be generated for each loop iteration
+#    corresponding to each perturbed policy.
+p_count = -1
 for p in pert_pols:
+    p_count += 1
+    print("Re-generating pathways for perturbed policy " + str(p_count))
+    
     #set the current policy to this perturbed policy
     FGPO.Policy.b = p
     
@@ -109,3 +115,14 @@ opt_pathway_objfn_ave = FGPO.calcObjFn()
 #  	Compare the objective function values of each of the pathways generated using perturbed policies to 
 #       the objective function values of the pathways generated under the optimal policy
 
+#print the results to a file for comparison in Excel, etc...
+f = open('RESULT_surrogate_truthing.txt', 'w')
+f.write("Optimal-policy pathways\n")
+f.write("total_prob,ave_prob\n")
+f.write(str(opt_pathway_objfn_total) + "," + str(opt_pathway_objfn_ave) + "\n")
+f.write("Perturbed-policy pathways\n")
+f.write("total_prob,ave_prob\n")
+for i in range(len(pert_pathways_objfn_total)):
+    f.write(str(pert_pathways_objfn_total[i]) + "," + str(pert_pathways_objfn_ave[i]) + "\n")
+    
+f.close()
