@@ -25,13 +25,15 @@ import random, math
 from FireGirlOptimizer import *
 FGPO = FireGirlPolicyOptimizer()
 
-pathway_count = 20
-iginition_count = 20
+pathway_count = 50
+ignition_count = 50
+perturb_magnitude = 0.5
 
 ### STEP 1 ######################################################
 #	Generate a set of pathways (100s) using a coin-toss policy
 
-FGPO.createFireGirlPathways(pathway_count,iginition_count)
+print("Creating original pathways with coin-toss policy")
+FGPO.createFireGirlPathways(pathway_count,ignition_count)
 
 
 ### STEP 2 ######################################################
@@ -59,14 +61,16 @@ for i in range(11):
         pol_copy2.append(pol_optim[j] + 1.0 - 1.0)
     
     #perturb the copied policies at index i
-    pol_copy1[i] += 0.5
-    pol_copy2[i] -= 0.5
+    pol_copy1[i] += perturb_magnitude
+    pol_copy2[i] -= perturb_magnitude
     
     #add the perturbed copies to the list
     pert_pols.append(pol_copy1)
     pert_pols.append(pol_copy2)
     
-
+#print(str(pert_pols))
+    
+    
 ### STEP 4 ######################################################
 #   Re-generate a new set of pathways, each using one of the perturbed policies to make its choices 
 
@@ -86,7 +90,11 @@ for p in pert_pols:
     FGPO.Policy.b = p
     
     #generate a new pathway set
-    FGPO.createFireGirlPathways(pathway_count,iginition_count)
+    #Note that this is will use the SAME STARTING POINTS for each set of pathways, but they
+    # will potentially evolve differently because of different treatment by the perturbed
+    # policies. The test can be run with DIFFERENT starting points as well, by using the
+    # optional arguement in .createFireGirlPathways(...)
+    FGPO.createFireGirlPathways(pathway_count,ignition_count)
     
     #calculate and save the objective function values of these pathways
     FGPO.USE_AVE_PROB = False
@@ -102,7 +110,8 @@ for p in pert_pols:
 FGPO.Policy.b = pol_optim
 
 #generate a new set of pathways using this set
-FGPO.createFireGirlPathways(pathway_count,iginition_count)
+print("Re-generating pathways for the optimal policy")
+FGPO.createFireGirlPathways(pathway_count,ignition_count)
 
 #record the objective function values
 FGPO.USE_AVE_PROB = False
@@ -117,6 +126,7 @@ opt_pathway_objfn_ave = FGPO.calcObjFn()
 
 #print the results to a file for comparison in Excel, etc...
 f = open('RESULT_surrogate_truthing.txt', 'w')
+f.write("Pathways: " + str(pathway_count) + "  Ignitions: " + str(ignition_count) + "  Perturbation +/- : " + str(perturb_magnitude) + "\n")
 f.write("Optimal-policy pathways\n")
 f.write("total_prob,ave_prob\n")
 f.write(str(opt_pathway_objfn_total) + "," + str(opt_pathway_objfn_ave) + "\n")

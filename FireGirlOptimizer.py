@@ -414,8 +414,12 @@ class FireGirlPolicyOptimizer:
         
         #Check if we need a new policy, or if one was passed in
         if policy == None:
+            #INSTEAD of what is below, just let the current policy stand. It should never
+            #      be null, because a coin-toss policy gets created at obj. instantiation
             #no policy passed, so create a new one
-            self.Policy = FireGirlPolicy(None,0,11)
+            #self.Policy = FireGirlPolicy(None,0,11)
+            pass
+            
         else:
             #one was passed, so set it to the current one.
             self.Policy = policy
